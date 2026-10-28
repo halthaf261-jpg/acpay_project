@@ -1,0 +1,20 @@
+{
+  "scanner1": {
+    "title": "Primary Fast Scanner (PhonePe / GPay)",
+    "upiVpa": "9381136860@ybl",
+    "accountName": "Althaf Hussain",
+    "image": ""
+  },
+  "scanner2": {
+    "title": "Backup Business Scanner (Paytm / BHIM)",
+    "upiVpa": "9381136860@ibl",
+    "accountName": "Althaf Hussain (Business)",
+    "image": ""
+  },
+  "companyBank": {
+    "bankName": "State Bank of India",
+    "accountHolder": "Althaf Hussain",
+    "accountNumber": "42971394203",
+    "ifsc": "SBIN0000977"
+  }
+}

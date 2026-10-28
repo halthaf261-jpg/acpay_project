@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACPay Master Admin Console</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#0b0e14] text-slate-300 min-h-screen flex selection:bg-indigo-500 selection:text-white">
+
+  <!-- Sidebar Navigation -->
+  <aside class="w-64 bg-[#0f1523] border-r border-slate-800 flex flex-col flex-shrink-0 min-h-screen text-xs select-none">
+    <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+      <div>
+        <h1 class="text-base font-extrabold text-white tracking-wide">ACPay Admin</h1>
+        <span class="text-[10px] text-indigo-400 font-mono">Master System</span>
+      </div>
+      <a href="/" target="_blank" class="text-slate-500 hover:text-white" title="Launch Platform"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+    </div>
+
+    <nav class="flex-1 p-3 space-y-1">
+      <button onclick="switchView('users')" id="nav-users" class="w-full text-left py-2.5 px-3 rounded-xl bg-indigo-600/20 text-indigo-400 font-bold flex items-center gap-2.5">
+        <i class="fa-solid fa-users"></i> Users & Points Control
+      </button>
+      <button onclick="switchView('utrs')" id="nav-utrs" class="w-full text-left py-2.5 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/40 font-bold flex items-center gap-2.5">
+        <i class="fa-solid fa-receipt"></i> Check User UTR Slips
+      </button>
+      <button onclick="switchView('scanners')" id="nav-scanners" class="w-full text-left py-2.5 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/40 font-bold flex items-center gap-2.5">
+        <i class="fa-solid fa-qrcode"></i> Update Two Scanners (JSON)
+      </button>
+      <button onclick="switchView('withdrawals')" id="nav-withdrawals" class="w-full text-left py-2.5 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/40 font-bold flex items-center gap-2.5">
+        <i class="fa-solid fa-money-bill-transfer"></i> 24h Withdrawals Queue
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <header class="h-14 bg-[#0f1523] border-b border-slate-800 px-6 flex items-center justify-between text-xs">
+      <span id="view-title" class="font-extrabold text-white uppercase tracking-wider">User Account Management</span>
+      <button onclick="loadData()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">
+        <i class="fa-solid fa-rotate mr-1"></i> Refresh Data
+      </button>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+      
+      <!-- VIEW A: USERS -->
+      <section id="sec-users" class="space-y-4">
+        <div class="bg-[#131929] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-[#0b0e14] text-slate-400 border-b border-slate-800 uppercase font-semibold text-[11px]">
+                <th class="p-3.5">User Gmail / UID</th>
+                <th class="p-3.5">Bound Accounts</th>
+                <th class="p-3.5 text-right">Balance</th>
+                <th class="p-3.5 text-right">Today Earn</th>
+                <th class="p-3.5 text-center">Modify Points</th>
+              </tr>
+            </thead>
+            <tbody id="user-rows" class="divide-y divide-slate-800 font-mono"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW B: CHECK UTR SLIPS -->
+      <section id="sec-utrs" class="hidden space-y-4">
+        <div class="bg-[#131929] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-[#0b0e14] text-slate-400 border-b border-slate-800 uppercase font-semibold text-[11px]">
+                <th class="p-3.5">Slip ID / Date</th>
+                <th class="p-3.5">User Gmail</th>
+                <th class="p-3.5">Scanner Used</th>
+                <th class="p-3.5">12-Digit UTR Ref</th>
+                <th class="p-3.5 text-right">Amount</th>
+                <th class="p-3.5 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="utr-rows" class="divide-y divide-slate-800 font-mono"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW C: UPDATE TWO SCANNERS (scanners_config.json) -->
+      <section id="sec-scanners" class="hidden space-y-6">
+        <div class="flex justify-between items-center bg-[#131929] p-4 rounded-2xl border border-slate-800">
+          <div>
+            <h3 class="text-sm font-bold text-white uppercase">Update Scanners & Bank Details</h3>
+            <p class="text-xs text-slate-400">Modifies scanners_config.json time-to-time without server restarts.</p>
+          </div>
+          <button onclick="commitScannerChanges()" class="bg-[#6440fe] hover:bg-[#522fe6] text-white px-5 py-2.5 rounded-xl font-bold text-xs transition">
+            Save All Changes
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <!-- Scanner 1 -->
+          <div class="bg-[#131929] border border-slate-800 rounded-2xl p-5 space-y-3">
+            <h4 class="font-bold text-indigo-400 uppercase border-b border-slate-800 pb-2">Scanner 1 (Primary)</h4>
+            <div>
+              <label class="block text-slate-400 mb-1">Title</label>
+              <input id="s1-title" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-white rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">UPI VPA</label>
+              <input id="s1-vpa" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-emerald-400 font-mono font-bold rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Account Holder Name</label>
+              <input id="s1-name" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-white rounded-xl p-2.5 outline-none">
+            </div>
+          </div>
+
+          <!-- Scanner 2 -->
+          <div class="bg-[#131929] border border-slate-800 rounded-2xl p-5 space-y-3">
+            <h4 class="font-bold text-amber-400 uppercase border-b border-slate-800 pb-2">Scanner 2 (Backup)</h4>
+            <div>
+              <label class="block text-slate-400 mb-1">Title</label>
+              <input id="s2-title" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-white rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">UPI VPA</label>
+              <input id="s2-vpa" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-emerald-400 font-mono font-bold rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Account Holder Name</label>
+              <input id="s2-name" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-white rounded-xl p-2.5 outline-none">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW D: WITHDRAWALS -->
+      <section id="sec-withdrawals" class="hidden space-y-4">
+        <div class="bg-[#131929] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-[#0b0e14] text-slate-400 border-b border-slate-800 uppercase font-semibold text-[11px]">
+                <th class="p-3.5">ID / Date</th>
+                <th class="p-3.5">User</th>
+                <th class="p-3.5">Destination Account</th>
+                <th class="p-3.5 text-right">Amount</th>
+                <th class="p-3.5 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="withdrawal-rows" class="divide-y divide-slate-800 font-mono"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    async function loadData() {
+      loadAdminUsers();
+      loadUtrSlips();
+      loadScannersConfig();
+      loadWithdrawals();
+    }
+
+    async function loadAdminUsers() {
+      const res = await fetch('/api/admin/all-users');
+      const data = await res.json();
+      const tbody = document.getElementById('user-rows');
+      tbody.innerHTML = '';
+
+      if (!data.users || data.users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">No registered users yet.</td></tr>';
+        return;
+      }
+
+      data.users.forEach(u => {
+        const upiListText = (u.upiList && u.upiList.length > 0)
+          ? u.upiList.map(a => `${a.bankName}: ${a.upiId}`).join(', ')
+          : '<span class="text-slate-500 italic">No account bound</span>';
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/30';
+        tr.innerHTML = `
+          <td class="p-3.5">
+            <span class="text-white font-sans font-bold block">${u.email}</span>
+            <span class="text-[11px] text-slate-500 font-sans">UID: ${u.uid} | Ref: ${u.myReferralCode}</span>
+          </td>
+          <td class="p-3.5 font-sans text-indigo-400 text-xs">${upiListText}</td>
+          <td class="p-3.5 text-right text-emerald-400 font-bold text-sm">₹${Number(u.balance).toFixed(2)}</td>
+          <td class="p-3.5 text-right text-slate-300 font-bold">₹${Number(u.todayEarn).toFixed(2)}</td>
+          <td class="p-3.5 text-center space-x-2 font-sans">
+            <button onclick="editPoints('${u.email}', ${u.balance}, ${u.todayEarn})" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/30 px-2.5 py-1 rounded text-xs transition">
+              Adjust Points
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadUtrSlips() {
+      const res = await fetch('/api/admin/utr-slips');
+      const data = await res.json();
+      const tbody = document.getElementById('utr-rows');
+      tbody.innerHTML = '';
+
+      if (!data.slips || data.slips.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">No pending UTR slips.</td></tr>';
+        return;
+      }
+
+      data.slips.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/30';
+        tr.innerHTML = `
+          <td class="p-3.5 text-slate-400 text-[11px]">${s.id}<br>${s.date}</td>
+          <td class="p-3.5 font-bold text-white font-sans">${s.email}</td>
+          <td class="p-3.5 text-indigo-400 font-sans">${s.scannerUsed}</td>
+          <td class="p-3.5 text-amber-300 font-bold text-sm tracking-wider">${s.utr}</td>
+          <td class="p-3.5 text-right font-bold text-emerald-400 text-sm">₹${Number(s.amount).toFixed(2)}</td>
+          <td class="p-3.5 text-center space-x-2 font-sans">
+            <button onclick="resolveUtr('${s.id}', 'approve')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded text-xs font-bold">Approve</button>
+            <button onclick="resolveUtr('${s.id}', 'reject')" class="bg-rose-600 hover:bg-rose-500 text-white px-2.5 py-1 rounded text-xs font-bold">Reject</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function resolveUtr(id, action) {
+      await fetch('/api/admin/resolve-utr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action })
+      });
+      loadData();
+    }
+
+    async function loadScannersConfig() {
+      const res = await fetch('/api/scanners/config');
+      const data = await res.json();
+      if (data.success && data.config) {
+        const c = data.config;
+        document.getElementById('s1-title').value = c.scanner1.title;
+        document.getElementById('s1-vpa').value = c.scanner1.upiVpa;
+        document.getElementById('s1-name').value = c.scanner1.accountName;
+
+        document.getElementById('s2-title').value = c.scanner2.title;
+        document.getElementById('s2-vpa').value = c.scanner2.upiVpa;
+        document.getElementById('s2-name').value = c.scanner2.accountName;
+      }
+    }
+
+    async function commitScannerChanges() {
+      const payload = {
+        scanner1: {
+          title: document.getElementById('s1-title').value.trim(),
+          upiVpa: document.getElementById('s1-vpa').value.trim(),
+          accountName: document.getElementById('s1-name').value.trim(),
+          image: ""
+        },
+        scanner2: {
+          title: document.getElementById('s2-title').value.trim(),
+          upiVpa: document.getElementById('s2-vpa').value.trim(),
+          accountName: document.getElementById('s2-name').value.trim(),
+          image: ""
+        },
+        companyBank: {
+          bankName: "State Bank of India",
+          accountHolder: "Althaf Hussain",
+          accountNumber: "42971394203",
+          ifsc: "SBIN0000977"
+        }
+      };
+
+      const res = await fetch('/api/admin/update-scanners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Both scanners updated in scanners_config.json!');
+      }
+    }
+
+    async function loadWithdrawals() {
+      const res = await fetch('/api/admin/withdrawals');
+      const data = await res.json();
+      const tbody = document.getElementById('withdrawal-rows');
+      tbody.innerHTML = '';
+
+      if (!data.withdrawals || data.withdrawals.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">No pending withdrawals.</td></tr>';
+        return;
+      }
+
+      data.withdrawals.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/30';
+        tr.innerHTML = `
+          <td class="p-3.5 text-[11px] text-slate-400">${w.id}<br>${w.date}</td>
+          <td class="p-3.5 font-bold text-white font-sans">${w.email}</td>
+          <td class="p-3.5 text-indigo-400 font-bold">${w.upiId}</td>
+          <td class="p-3.5 text-right font-bold text-emerald-400 text-sm">₹${Number(w.amount).toFixed(2)}</td>
+          <td class="p-3.5 text-center space-x-2 font-sans">
+            <button onclick="resolveWithdrawal('${w.id}', 'approve')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded text-xs font-bold">Approve</button>
+            <button onclick="resolveWithdrawal('${w.id}', 'reject')" class="bg-rose-600 hover:bg-rose-500 text-white px-2.5 py-1 rounded text-xs font-bold">Reject</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function resolveWithdrawal(id, action) {
+      await fetch('/api/admin/approve-withdrawal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action })
+      });
+      loadData();
+    }
+
+    async function editPoints(email, curBal, curToday) {
+      const b = prompt(`Set new balance for ${email}:`, curBal);
+      if (b === null) return;
+      const t = prompt(`Set new Today Earn for ${email}:`, curToday);
+      if (t === null) return;
+
+      await fetch('/api/admin/update-user-points', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, balance: b, todayEarn: t })
+      });
+      loadData();
+    }
+
+    function switchView(v) {
+      document.getElementById('sec-users').classList.toggle('hidden', v !== 'users');
+      document.getElementById('sec-utrs').classList.toggle('hidden', v !== 'utrs');
+      document.getElementById('sec-scanners').classList.toggle('hidden', v !== 'scanners');
+      document.getElementById('sec-withdrawals').classList.toggle('hidden', v !== 'withdrawals');
+
+      ['users', 'utrs', 'scanners', 'withdrawals'].forEach(id => {
+        document.getElementById(`nav-${id}`).className = id === v
+          ? 'w-full text-left py-2.5 px-3 rounded-xl bg-indigo-600/20 text-indigo-400 font-bold flex items-center gap-2.5'
+          : 'w-full text-left py-2.5 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/40 font-bold flex items-center gap-2.5';
+      });
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
