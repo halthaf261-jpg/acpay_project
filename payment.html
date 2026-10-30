@@ -1,204 +1,777 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ACPay Secure Gateway | Two Scanners</title>
+  <title>ACPay | Terminal Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    * { font-family: 'Plus Jakarta Sans', sans-serif; }
-  </style>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-20">
 
-  <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-    
-    <!-- Top Header -->
-    <div class="bg-[#6440fe] text-white p-5 flex justify-between items-center">
-      <div>
-        <h1 class="font-extrabold text-base tracking-wide">ACPay Deposit Gateway</h1>
-        <p class="text-[11px] text-indigo-200">User: <span id="display-user-email">...</span></p>
-      </div>
-      <div class="text-right">
-        <span class="text-[10px] uppercase font-bold text-indigo-200 block">Deposit Amount</span>
-        <span id="display-amount" class="text-2xl font-black font-mono">₹0.00</span>
-      </div>
+  <!-- TOP HEADER -->
+  <header class="bg-indigo-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
+    <div class="flex items-center space-x-2">
+      <div class="w-8 h-8 rounded-full bg-white text-indigo-600 flex items-center justify-center font-black">⚡</div>
+      <h1 class="text-xl font-bold tracking-tight">ACPay Terminal</h1>
     </div>
+    <div class="flex items-center space-x-3">
+      <button onclick="toggleAdminPanel()" class="bg-amber-500 hover:bg-amber-600 text-xs px-2.5 py-1 rounded font-bold uppercase tracking-wider">
+        <i class="fa-solid fa-shield-halved mr-1"></i> Admin
+      </button>
+      <button id="logoutBtn" onclick="logout()" class="hidden bg-indigo-700 hover:bg-indigo-800 text-xs px-2.5 py-1 rounded font-semibold">
+        Logout
+      </button>
+    </div>
+  </header>
 
-    <div class="p-6 space-y-6">
-
-      <!-- Scanner Switcher (Scanner 1 vs Scanner 2) -->
-      <div>
-        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-2">Select Payment Scanner</span>
-        <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold">
-          <button id="btn-tab-s1" onclick="switchScanner('scanner1')" class="py-2.5 rounded-xl bg-[#6440fe] text-white shadow-sm transition">
-            Scanner 1 (PhonePe)
-          </button>
-          <button id="btn-tab-s2" onclick="switchScanner('scanner2')" class="py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition">
-            Scanner 2 (Paytm)
-          </button>
-        </div>
-      </div>
-      
-      <!-- QR Scanner Display Container -->
-      <div class="flex flex-col items-center bg-slate-50 border border-slate-200 rounded-3xl p-5 shadow-inner">
-        <span id="active-scanner-title" class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 text-center">Primary Fast Scanner</span>
-        <div class="w-56 h-56 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-md flex items-center justify-center overflow-hidden">
-          <img id="active-qr-img" src="" alt="Payment Scanner" class="w-full h-full object-contain rounded-xl">
-        </div>
-        <div class="flex items-center gap-2 mt-3 text-xs text-slate-500">
-          <i class="fa-solid fa-qrcode text-[#6440fe]"></i>
-          <span id="active-scanner-vpa" class="font-mono font-bold text-indigo-900">...</span>
-        </div>
+  <!-- 1. AUTH SCREEN (REGISTER / SIGN-IN) -->
+  <main id="authSection" class="max-w-md mx-auto mt-8 p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200">
+      <div class="flex border-b border-slate-200 mb-6">
+        <button id="tabRegister" onclick="switchAuthTab('register')" class="w-1/2 pb-3 font-bold text-center border-b-2 border-indigo-600 text-indigo-600">Register Account</button>
+        <button id="tabLogin" onclick="switchAuthTab('login')" class="w-1/2 pb-3 font-semibold text-center text-slate-400">Sign In</button>
       </div>
 
-      <!-- Company Bank Account Transfer Details -->
-      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2 text-xs font-mono">
-        <div class="text-[11px] font-sans font-bold uppercase tracking-wider text-slate-700 mb-1">Company Direct Deposit Bank</div>
-        <div class="flex justify-between items-center py-1 border-b border-slate-200">
-          <span class="text-slate-500 font-sans">Bank:</span>
-          <span id="disp-bank-name" class="font-bold text-slate-800 font-sans">State Bank of India</span>
-        </div>
-        <div class="flex justify-between items-center py-1 border-b border-slate-200">
-          <span class="text-slate-500 font-sans">Account Holder:</span>
-          <span id="disp-acc-holder" class="font-bold text-slate-800 font-sans">Althaf Hussain</span>
-        </div>
-        <div class="flex justify-between items-center py-1 border-b border-slate-200">
-          <span class="text-slate-500 font-sans">Account No:</span>
-          <span id="disp-acc-num" class="font-bold text-indigo-700 text-sm">42971394203</span>
-        </div>
-        <div class="flex justify-between items-center py-1">
-          <span class="text-slate-500 font-sans">IFSC Code:</span>
-          <span id="disp-ifsc" class="font-bold text-slate-800 uppercase">SBIN0000977</span>
-        </div>
-      </div>
-
-      <!-- Enter 12-Digit UTR Number -->
-      <div class="space-y-3">
+      <!-- Register Form -->
+      <div id="registerForm" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Enter 12-Digit UTR Reference Number</label>
-          <input id="utr-input" type="text" maxlength="16" placeholder="e.g. 423981729103" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-mono font-bold text-slate-800 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 shadow-sm">
+          <label class="block text-xs font-bold text-slate-600 mb-1">GMAIL ADDRESS</label>
+          <div class="flex space-x-2">
+            <input type="email" id="regEmail" placeholder="yourname@gmail.com" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            <button id="sendOtpBtn" onclick="sendOtp()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2 rounded-lg font-bold whitespace-nowrap">Send OTP</button>
+          </div>
         </div>
-
-        <button onclick="submitUtrSlip()" id="btn-submit-utr" class="w-full bg-[#6440fe] hover:bg-[#522fe6] text-white font-bold py-3.5 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-2 cursor-pointer">
-          <i class="fa-solid fa-circle-check"></i>
-          <span>Submit UTR for Verification</span>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">VERIFICATION CODE</label>
+          <input type="text" id="regOtp" placeholder="6-digit OTP from Gmail" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">FRIEND'S REFERRAL CODE (OPTIONAL)</label>
+          <input type="text" id="regRef" placeholder="e.g. AC-XXXXX" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm uppercase">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">CREATE PASSWORD</label>
+          <input type="password" id="regPass" placeholder="Create strong password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+        </div>
+        <button onclick="registerAccount()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-sm mt-2">
+          Create Account & Proceed
         </button>
       </div>
 
-      <div id="status-box" class="hidden p-4 rounded-xl text-center text-xs space-y-1"></div>
+      <!-- Sign In Form -->
+      <div id="loginForm" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">REGISTERED GMAIL</label>
+          <input type="email" id="loginEmail" placeholder="yourname@gmail.com" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">PASSWORD</label>
+          <input type="password" id="loginPass" placeholder="Password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">SIGN-IN SECURITY OTP</label>
+          <div class="flex space-x-2">
+            <input type="text" id="loginOtp" placeholder="6-digit code" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            <button id="btnLoginOtp" onclick="sendLoginOtp()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2 rounded-lg font-bold whitespace-nowrap">Send OTP</button>
+          </div>
+        </div>
+        <button onclick="loginUser()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-sm mt-2">
+          Verify & Sign In
+        </button>
+      </div>
+    </div>
+  </main>
 
+  <!-- 2. MAIN DASHBOARD -->
+  <main id="dashboardSection" class="max-w-xl mx-auto mt-4 px-4 hidden space-y-4">
+    <!-- Balance & Stats Card -->
+    <div class="bg-gradient-to-r from-indigo-700 to-violet-800 text-white rounded-2xl p-5 shadow-lg relative">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-indigo-200">My Balance</p>
+          <h2 class="text-3xl font-black mt-1">₹<span id="userBalance">0.00</span></h2>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-indigo-200">Referral Code</p>
+          <p id="userRefCode" class="font-mono font-bold text-amber-300 tracking-wider">AC-XXXXX</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-indigo-500/30 text-xs">
+        <div>Active Plans: <span class="font-bold text-emerald-300" id="activePlanCount">0</span></div>
+        <div class="text-right">Referral Earnings: <span class="font-bold text-amber-300" id="refEarn">₹0.00</span></div>
+      </div>
+      <div class="mt-4 flex space-x-2">
+        <button onclick="switchTab('packages')" class="flex-1 bg-white text-indigo-700 py-1.5 rounded-lg font-bold text-xs shadow hover:bg-indigo-50">
+          <i class="fa-solid fa-cart-shopping mr-1"></i> Packages
+        </button>
+        <button onclick="switchTab('withdraw')" class="flex-1 bg-emerald-500 text-white py-1.5 rounded-lg font-bold text-xs shadow hover:bg-emerald-600">
+          <i class="fa-solid fa-arrow-down-long mr-1"></i> Withdraw
+        </button>
+        <button onclick="switchTab('upi')" class="flex-1 bg-indigo-900/60 text-white py-1.5 rounded-lg font-bold text-xs shadow hover:bg-indigo-900">
+          <i class="fa-solid fa-building-columns mr-1"></i> Add UPI
+        </button>
+      </div>
+    </div>
+
+    <!-- Referral Incentive & Discount Rule -->
+    <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 flex items-start space-x-3 shadow-sm">
+      <div class="text-amber-500 text-xl mt-0.5"><i class="fa-solid fa-gift"></i></div>
+      <div class="text-xs text-amber-900 leading-relaxed">
+        <span class="font-bold uppercase tracking-wider block text-amber-800">Special Promotion Task:</span>
+        Invite 1 friend with your referral code. Once they purchase any plan via UTR, you unlock an instant <strong>30% discount</strong> on all plans and receive <strong>₹800 referral incentive</strong> credited to your account!
+      </div>
+    </div>
+
+    <!-- Nav Tabs -->
+    <div class="flex bg-white rounded-xl p-1 shadow border border-slate-200 text-xs font-bold text-slate-600">
+      <button onclick="switchTab('packages')" id="btnTabPackages" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white">Packages</button>
+      <button onclick="switchTab('activity')" id="btnTabActivity" class="flex-1 py-2 rounded-lg text-slate-500 hover:text-indigo-600">Activity</button>
+      <button onclick="switchTab('tree')" id="btnTabTree" class="flex-1 py-2 rounded-lg text-slate-500 hover:text-indigo-600">Referral Tree</button>
+    </div>
+
+    <!-- TAB: PACKAGES VIEW -->
+    <section id="viewPackages" class="space-y-3">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-sm">Select Investment Package</h3>
+        <p class="text-xs text-slate-500">Tap Buy Plan on any tier to open the payment gateway with scanners[cite: 12].</p>
+      </div>
+      <div id="packageList" class="space-y-3"></div>
+    </section>
+
+    <!-- TAB: ACTIVITY VIEW -->
+    <section id="viewActivity" class="hidden space-y-3">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-sm">My Active Packages</h3>
+        <p class="text-xs text-slate-500">All approved investment plans running in your terminal.</p>
+      </div>
+      <div id="activityList" class="space-y-2"></div>
+    </section>
+
+    <!-- TAB: REFERRAL TREE -->
+    <section id="viewTree" class="hidden space-y-3">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-sm">Referral Network Tree</h3>
+        <p class="text-xs text-slate-500">Friends registered with your referral code.</p>
+      </div>
+      <div id="treeList" class="space-y-2"></div>
+    </section>
+
+    <!-- TAB: WITHDRAW -->
+    <section id="viewWithdraw" class="hidden space-y-3">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+        <h3 class="font-bold text-slate-800 text-sm">Withdraw to Bank / UPI</h3>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">WITHDRAWAL AMOUNT (₹)</label>
+          <input type="number" id="withdrawAmount" placeholder="Enter amount" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">SELECT BOUND ACCOUNT</label>
+          <select id="withdrawSelectUpi" class="w-full px-3 py-2 border rounded-lg text-sm bg-white"></select>
+        </div>
+        <button onclick="requestWithdrawal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-sm">
+          Submit Withdrawal Request
+        </button>
+      </div>
+    </section>
+
+    <!-- TAB: ADD UPI / BANK -->
+    <section id="viewUpi" class="hidden space-y-3">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+        <h3 class="font-bold text-slate-800 text-sm">Add UPI / Bank Details</h3>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">UPI ID (VPA)</label>
+          <input type="text" id="upiVpa" placeholder="example@oksbi" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">BANK NAME</label>
+          <input type="text" id="upiBank" placeholder="State Bank of India" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">ACCOUNT NUMBER</label>
+          <input type="text" id="upiAcc" placeholder="Account Number" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">IFSC CODE</label>
+          <input type="text" id="upiIfsc" placeholder="SBIN0000977" class="w-full px-3 py-2 border rounded-lg text-sm uppercase">
+        </div>
+        <button onclick="saveUpiDetails()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-sm">
+          Save Bank Details
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 3. DIRECT PAYMENT SCANNER SCREEN (OPENS WHEN BUY PLAN IS CLICKED) -->
+  <main id="paymentGatewaySection" class="max-w-md mx-auto mt-6 px-4 hidden space-y-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200 space-y-5">
+      <div class="flex justify-between items-center border-b pb-3">
+        <div>
+          <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider" id="pgPlanTag">TIER PAYMENT</span>
+          <h3 class="text-lg font-bold text-slate-800" id="pgPlanTitle">Investment Plan</h3>
+        </div>
+        <button onclick="closePaymentGateway()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1 rounded font-bold">
+          &larr; Back
+        </button>
+      </div>
+
+      <!-- Amount Banner -->
+      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 flex justify-between items-center">
+        <span class="text-xs font-bold text-slate-600">Total Payable:</span>
+        <span class="text-2xl font-black text-indigo-700" id="pgPayableAmount">₹0</span>
+      </div>
+
+      <!-- Scanner Switcher Buttons -->
+      <div class="flex space-x-2">
+        <button id="btnScanner1" onclick="setScanner(1)" class="flex-1 py-2 rounded-lg font-bold text-xs bg-indigo-600 text-white">Scanner 1 (PhonePe)</button>
+        <button id="btnScanner2" onclick="setScanner(2)" class="flex-1 py-2 rounded-lg font-bold text-xs bg-slate-100 text-slate-600">Scanner 2 (Paytm)</button>
+      </div>
+
+      <!-- Fast Scanner Box -->
+      <div class="text-center p-4 border rounded-xl bg-slate-50 flex flex-col items-center">
+        <p class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">PRIMARY FAST SCANNER[cite: 11]</p>
+        <div class="w-48 h-48 bg-white border-2 border-dashed border-indigo-300 rounded-xl flex items-center justify-center p-2 shadow-inner">
+          <img id="scannerQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=42971394203@sbi&pn=Althaf%20Hussain&cu=INR" alt="Payment Scanner" class="w-full h-full object-contain">
+        </div>
+        <p class="text-[11px] text-slate-400 mt-2">Scan with PhonePe, Google Pay, or Paytm[cite: 11]</p>
+      </div>
+
+      <!-- Bank Deposit Details -->
+      <div class="bg-slate-50 border rounded-xl p-4 space-y-2 text-xs">
+        <p class="font-bold text-slate-500 uppercase tracking-wider text-[11px]">COMPANY DIRECT DEPOSIT BANK[cite: 11]</p>
+        <div class="flex justify-between border-b pb-1">
+          <span class="text-slate-500">Bank:[cite: 11]</span>
+          <span class="font-bold text-slate-800">State Bank of India[cite: 11]</span>
+        </div>
+        <div class="flex justify-between border-b pb-1">
+          <span class="text-slate-500">Account Holder:[cite: 11]</span>
+          <span class="font-bold text-slate-800">Althaf Hussain[cite: 11]</span>
+        </div>
+        <div class="flex justify-between border-b pb-1">
+          <span class="text-slate-500">Account No:[cite: 11]</span>
+          <span class="font-mono font-bold text-indigo-700 text-sm">42971394203[cite: 11]</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">IFSC Code:[cite: 11]</span>
+          <span class="font-mono font-bold text-slate-800">SBIN0000977[cite: 11]</span>
+        </div>
+      </div>
+
+      <!-- UTR Input & Submit -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold text-slate-600 uppercase">ENTER 12–DIGIT UTR REFERENCE NUMBER[cite: 11]</label>
+        <input type="text" id="pgUtrInput" placeholder="789456123032" maxlength="12" class="w-full px-3 py-2.5 border rounded-lg text-sm font-mono tracking-widest text-center focus:ring-2 focus:ring-indigo-500[cite: 11]">
+        <button id="btnSubmitUtr" onclick="submitGatewayUtr()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg text-sm shadow-md transition">
+          Submit Reference Number[cite: 11]
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 4. ADMIN PANEL OVERLAY MODAL -->
+  <div id="adminPanelModal" class="fixed inset-0 bg-slate-900/70 z-50 overflow-y-auto p-4 hidden">
+    <div class="max-w-2xl mx-auto bg-white rounded-2xl p-6 shadow-2xl space-y-6">
+      <div class="flex justify-between items-center border-b pb-3">
+        <div>
+          <h2 class="text-lg font-bold text-slate-800">ACPay Master Administration</h2>
+          <p class="text-xs text-slate-500">Approve UTRs, add points, and verify tree referral incentives.</p>
+        </div>
+        <button onclick="toggleAdminPanel()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+      </div>
+
+      <!-- Pending UTR Submissions -->
+      <div>
+        <h4 class="text-xs font-bold uppercase text-slate-500 mb-2">Pending UTR Submissions</h4>
+        <div id="adminDepositsList" class="space-y-2 text-xs"></div>
+      </div>
+
+      <!-- Direct Balance Credit -->
+      <div class="border-t pt-4">
+        <h4 class="text-xs font-bold uppercase text-slate-500 mb-2">Direct Balance Credit</h4>
+        <div class="flex space-x-2">
+          <input type="email" id="adminCreditEmail" placeholder="user@gmail.com" class="flex-1 px-3 py-2 border rounded-lg text-xs">
+          <input type="number" id="adminCreditAmount" placeholder="Amount (₹)" class="w-28 px-3 py-2 border rounded-lg text-xs">
+          <button onclick="adminAdjustBalance()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold text-xs">Credit</button>
+        </div>
+      </div>
+
+      <!-- Users Ledger -->
+      <div class="border-t pt-4">
+        <h4 class="text-xs font-bold uppercase text-slate-500 mb-2">Registered Users Ledger</h4>
+        <div id="adminUsersList" class="max-h-48 overflow-y-auto space-y-1 text-xs"></div>
+      </div>
     </div>
   </div>
 
+  <!-- SCRIPT LOGIC -->
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const amount = urlParams.get('amount') || '500';
-    const email = urlParams.get('email') || 'user@gmail.com';
+    let currentUser = null;
+    let selectedPlanForPayment = null;
 
-    document.getElementById('display-amount').innerText = `₹${Number(amount).toLocaleString('en-IN')}`;
-    document.getElementById('display-user-email').innerText = email;
-
-    let scannersConfig = null;
-    let activeScannerKey = 'scanner1';
-
-    async function loadScanners() {
-      try {
-        const res = await fetch('/api/scanners/config');
-        const data = await res.json();
-        if (data.success && data.config) {
-          scannersConfig = data.config;
-
-          const b = scannersConfig.companyBank || {};
-          document.getElementById('disp-bank-name').innerText = b.bankName || 'State Bank of India';
-          document.getElementById('disp-acc-holder').innerText = b.accountHolder || 'Althaf Hussain';
-          document.getElementById('disp-acc-num').innerText = b.accountNumber || '42971394203';
-          document.getElementById('disp-ifsc').innerText = b.ifsc || 'SBIN0000977';
-
-          renderActiveScanner();
-        }
-      } catch (err) {
-        console.error(err);
+    // Check if URL has query parameters from a previous direct link
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const email = params.get('email');
+      if (email) {
+        document.getElementById('loginEmail').value = email;
+        document.getElementById('regEmail').value = email;
       }
-    }
+    });
 
-    function switchScanner(key) {
-      activeScannerKey = key;
-      const isS1 = key === 'scanner1';
-      document.getElementById('btn-tab-s1').className = isS1
-        ? 'py-2.5 rounded-xl bg-[#6440fe] text-white shadow-sm transition'
-        : 'py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
-
-      document.getElementById('btn-tab-s2').className = !isS1
-        ? 'py-2.5 rounded-xl bg-[#6440fe] text-white shadow-sm transition'
-        : 'py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
-
-      renderActiveScanner();
-    }
-
-    function renderActiveScanner() {
-      if (!scannersConfig) return;
-      const s = scannersConfig[activeScannerKey];
-      document.getElementById('active-scanner-title').innerText = s.title;
-      document.getElementById('active-scanner-vpa').innerText = s.upiVpa;
-
-      const img = document.getElementById('active-qr-img');
-      if (s.image && s.image.trim() !== '') {
-        img.src = s.image;
+    // SWITCH AUTH TABS
+    function switchAuthTab(tab) {
+      if (tab === 'register') {
+        document.getElementById('registerForm').classList.remove('hidden');
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('tabRegister').className = "w-1/2 pb-3 font-bold text-center border-b-2 border-indigo-600 text-indigo-600";
+        document.getElementById('tabLogin').className = "w-1/2 pb-3 font-semibold text-center text-slate-400";
       } else {
-        const upiUrl = `upi://pay?pa=${s.upiVpa}&pn=${encodeURIComponent(s.accountName)}&am=${amount}&cu=INR`;
-        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiUrl)}`;
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('tabLogin').className = "w-1/2 pb-3 font-bold text-center border-b-2 border-indigo-600 text-indigo-600";
+        document.getElementById('tabRegister').className = "w-1/2 pb-3 font-semibold text-center text-slate-400";
       }
     }
 
-    async function submitUtrSlip() {
-      const utr = document.getElementById('utr-input').value.trim();
-      if (!utr || utr.length < 8) return alert('Enter a valid 12-digit UTR reference number');
-
-      const btn = document.getElementById('btn-submit-utr');
-      btn.innerText = 'Submitting...';
+    // REGISTRATION OTP
+    async function sendOtp() {
+      const email = document.getElementById('regEmail').value.trim();
+      if (!email) return alert('Please enter your Gmail address');
+      const btn = document.getElementById('sendOtpBtn');
+      btn.innerText = 'Sending...';
       btn.disabled = true;
 
       try {
-        const res = await fetch('/api/user/submit-utr', {
+        const res = await fetch('/api/auth/register-send-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email,
-            amount,
-            utr,
-            selectedScanner: activeScannerKey === 'scanner1' ? 'Scanner 1' : 'Scanner 2'
-          })
+          body: JSON.stringify({ email })
         });
         const data = await res.json();
-        const box = document.getElementById('status-box');
-        box.classList.remove('hidden');
-
         if (data.success) {
-          box.className = 'p-4 rounded-xl text-center text-xs bg-emerald-50 text-emerald-800 border border-emerald-200';
-          box.innerHTML = `
-            <i class="fa-solid fa-check-circle text-emerald-600 text-lg mb-1 block"></i>
-            <p class="font-bold">UTR ${utr} Transmitted to Admin!</p>
-            <p class="text-slate-500">Points will be added to your balance upon admin verification.</p>
-          `;
-          document.getElementById('utr-input').disabled = true;
-          btn.classList.add('hidden');
+          alert('Registration OTP sent to your Gmail inbox!');
+          btn.innerText = 'Sent';
         } else {
-          box.className = 'p-4 rounded-xl text-center text-xs bg-rose-50 text-rose-800 border border-rose-200';
-          box.innerText = data.error || 'Submission failed';
-          btn.innerText = 'Submit UTR for Verification';
+          alert(data.error || 'Failed to dispatch OTP');
+          btn.innerText = 'Send OTP';
           btn.disabled = false;
         }
-      } catch (err) {
+      } catch (e) {
         alert('Server unreachable');
-        btn.innerText = 'Submit UTR for Verification';
+        btn.innerText = 'Send OTP';
         btn.disabled = false;
       }
     }
 
-    loadScanners();
+    // REGISTER
+    async function registerAccount() {
+      const email = document.getElementById('regEmail').value.trim();
+      const otp = document.getElementById('regOtp').value.trim();
+      const referralCode = document.getElementById('regRef').value.trim();
+      const password = document.getElementById('regPass').value.trim();
+
+      if (!email || !otp || !password) return alert('Please fill all mandatory fields');
+
+      const res = await fetch('/api/auth/register-create-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp, referralCode, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        switchAuthTab('login');
+        document.getElementById('loginEmail').value = email;
+      } else {
+        alert(data.error || 'Registration failed');
+      }
+    }
+
+    // LOGIN OTP
+    async function sendLoginOtp() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPass').value.trim();
+      const btn = document.getElementById('btnLoginOtp');
+
+      if (!email || !password) return alert('Please enter registered email and password first');
+      btn.innerText = 'Sending...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/auth/login-send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message || 'Security OTP sent to your Gmail inbox!');
+          btn.innerText = 'Sent';
+        } else {
+          alert(data.error || 'Failed to dispatch OTP');
+          btn.innerText = 'Send OTP';
+          btn.disabled = false;
+        }
+      } catch (e) {
+        alert('Server unreachable');
+        btn.innerText = 'Send OTP';
+        btn.disabled = false;
+      }
+    }
+
+    // LOGIN
+    async function loginUser() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPass').value.trim();
+      const otp = document.getElementById('loginOtp').value.trim();
+
+      const res = await fetch('/api/auth/login-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, otp })
+      });
+      const data = await res.json();
+      if (data.success) {
+        currentUser = data.user;
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('dashboardSection').classList.remove('hidden');
+        document.getElementById('logoutBtn').classList.remove('hidden');
+        loadDashboard();
+      } else {
+        alert(data.error || 'Invalid credentials or OTP');
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('dashboardSection').classList.add('hidden');
+      document.getElementById('paymentGatewaySection').classList.add('hidden');
+      document.getElementById('logoutBtn').classList.add('hidden');
+      document.getElementById('authSection').classList.remove('hidden');
+    }
+
+    // DASHBOARD DATA
+    async function loadDashboard() {
+      if (!currentUser) return;
+      const res = await fetch(`/api/user/profile?email=${encodeURIComponent(currentUser.email)}`);
+      const data = await res.json();
+      if (data.success) {
+        currentUser = data.user;
+        document.getElementById('userBalance').innerText = Number(currentUser.balance).toFixed(2);
+        document.getElementById('userRefCode').innerText = currentUser.myReferralCode;
+        document.getElementById('refEarn').innerText = `₹${currentUser.referralIncentivesEarned || 0}`;
+        populateUpiDropdown();
+      }
+      loadPackages();
+      loadActivityAndTree();
+    }
+
+    // NAVIGATION TABS
+    function switchTab(tab) {
+      ['packages', 'activity', 'tree', 'withdraw', 'upi'].forEach(t => {
+        const el = document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (el) el.classList.add('hidden');
+      });
+
+      const target = document.getElementById('view' + tab.charAt(0).toUpperCase() + tab.slice(1));
+      if (target) target.classList.remove('hidden');
+
+      if (tab === 'activity' || tab === 'tree') loadActivityAndTree();
+    }
+
+    // PACKAGES LIST
+    async function loadPackages() {
+      const res = await fetch('/api/packages/list');
+      const data = await res.json();
+      const container = document.getElementById('packageList');
+      container.innerHTML = '';
+
+      const checkRes = await fetch(`/api/user/activity-and-tree?email=${encodeURIComponent(currentUser.email)}`);
+      const checkData = await checkRes.json();
+      const discountEligible = checkData.qualifiesForDiscount;
+
+      data.packages.forEach(pkg => {
+        const finalPrice = discountEligible ? Math.round(pkg.amount * 0.70) : pkg.amount;
+        container.innerHTML += `
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">${pkg.title}</span>
+              <div class="flex items-center space-x-2 mt-0.5">
+                <span class="text-xl font-black text-slate-800">₹${finalPrice.toLocaleString()}</span>
+                ${discountEligible ? `<span class="text-xs line-through text-slate-400">₹${pkg.amount.toLocaleString()}</span><span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">30% OFF</span>` : ''}
+              </div>
+              <p class="text-xs text-emerald-600 font-semibold mt-0.5">+₹${pkg.dailyReturn}/day return</p>
+            </div>
+            <div>
+              <button onclick="openPaymentGateway('${pkg.id}', '${pkg.title}', ${finalPrice})" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-lg shadow">
+                Buy Plan
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // OPEN SCANNER PAYMENT GATEWAY
+    function openPaymentGateway(planId, title, amount) {
+      selectedPlanForPayment = { planId, title, amount };
+      document.getElementById('pgPlanTitle').innerText = title;
+      document.getElementById('pgPayableAmount').innerText = `₹${amount.toLocaleString()}`;
+      document.getElementById('pgUtrInput').value = '';
+
+      // Update QR Code with exact amount
+      const upiUrl = `upi://pay?pa=42971394203@sbi&pn=Althaf%20Hussain&am=${amount}&cu=INR`;
+      document.getElementById('scannerQrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
+
+      document.getElementById('dashboardSection').classList.add('hidden');
+      document.getElementById('paymentGatewaySection').classList.remove('hidden');
+      window.scrollTo(0, 0);
+    }
+
+    function closePaymentGateway() {
+      document.getElementById('paymentGatewaySection').classList.add('hidden');
+      document.getElementById('dashboardSection').classList.remove('hidden');
+    }
+
+    function setScanner(num) {
+      if (num === 1) {
+        document.getElementById('btnScanner1').className = "flex-1 py-2 rounded-lg font-bold text-xs bg-indigo-600 text-white";
+        document.getElementById('btnScanner2').className = "flex-1 py-2 rounded-lg font-bold text-xs bg-slate-100 text-slate-600";
+      } else {
+        document.getElementById('btnScanner2').className = "flex-1 py-2 rounded-lg font-bold text-xs bg-indigo-600 text-white";
+        document.getElementById('btnScanner1').className = "flex-1 py-2 rounded-lg font-bold text-xs bg-slate-100 text-slate-600";
+      }
+    }
+
+    // SUBMIT UTR
+    async function submitGatewayUtr() {
+      const utr = document.getElementById('pgUtrInput').value.trim();
+      if (!utr || utr.length < 12) return alert('Please enter a valid 12-digit UTR reference number');
+
+      const btn = document.getElementById('btnSubmitUtr');
+      btn.innerText = 'Submitting...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/deposit/submit-utr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: currentUser.email,
+            utr,
+            planId: selectedPlanForPayment.planId,
+            amount: selectedPlanForPayment.amount
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('UTR submitted successfully! Once approved in Admin Panel, plan will activate in Activity.');
+          closePaymentGateway();
+          loadDashboard();
+        } else {
+          alert(data.error || 'Submission failed');
+        }
+      } catch (e) {
+        alert('Server unreachable');
+      } finally {
+        btn.innerText = 'Submit Reference Number';
+        btn.disabled = false;
+      }
+    }
+
+    // ACTIVITY & TREE
+    async function loadActivityAndTree() {
+      if (!currentUser) return;
+      const res = await fetch(`/api/user/activity-and-tree?email=${encodeURIComponent(currentUser.email)}`);
+      const data = await res.json();
+
+      // Activity List
+      const act = document.getElementById('activityList');
+      act.innerHTML = '';
+      document.getElementById('activePlanCount').innerText = data.purchases?.length || 0;
+
+      if (!data.purchases || data.purchases.length === 0) {
+        act.innerHTML = '<p class="text-xs text-slate-400 p-3 bg-white rounded-xl">No active investment plans yet. Buy a plan to begin.</p>';
+      } else {
+        data.purchases.forEach(p => {
+          act.innerHTML += `
+            <div class="bg-white p-3 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
+              <div>
+                <p class="font-bold text-slate-800">${p.title}</p>
+                <p class="text-[11px] text-slate-400">${new Date(p.date).toLocaleDateString()}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-emerald-600">+₹${p.dailyReturn}/day</p>
+                <p class="text-[10px] text-slate-400">Activated: ₹${p.cost}</p>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // Referral Tree
+      const tree = document.getElementById('treeList');
+      tree.innerHTML = '';
+      if (!data.tree || data.tree.length === 0) {
+        tree.innerHTML = '<p class="text-xs text-slate-400 p-3 bg-white rounded-xl">No downline referrals yet. Share your code!</p>';
+      } else {
+        data.tree.forEach(t => {
+          tree.innerHTML += `
+            <div class="bg-white p-3 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
+              <div class="flex items-center space-x-2">
+                <div class="w-7 h-7 rounded-full ${t.hasActivePlan ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'} flex items-center justify-center font-bold">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+                <div>
+                  <p class="font-bold text-slate-800">${t.email}</p>
+                  <p class="text-[10px] text-slate-400">UID: ${t.uid}</p>
+                </div>
+              </div>
+              <div>
+                <span class="text-[10px] px-2 py-0.5 rounded font-bold ${t.hasActivePlan ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                  ${t.hasActivePlan ? 'Active Plan (30% Discount Unlocked)' : 'No Plan Yet'}
+                </span>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    // WITHDRAW
+    function populateUpiDropdown() {
+      const select = document.getElementById('withdrawSelectUpi');
+      select.innerHTML = '';
+      if (!currentUser.upiList || currentUser.upiList.length === 0) {
+        select.innerHTML = '<option value="">No bound accounts. Please click Add UPI first.</option>';
+      } else {
+        currentUser.upiList.forEach(u => {
+          select.innerHTML += `<option value="${u.upiId}">${u.bankName} - ${u.upiId || u.accountNo}</option>`;
+        });
+      }
+    }
+
+    async function requestWithdrawal() {
+      const amount = document.getElementById('withdrawAmount').value;
+      const upiId = document.getElementById('withdrawSelectUpi').value;
+      if (!amount || amount <= 0) return alert('Enter a valid amount');
+      if (!upiId) return alert('Please bind a bank/UPI account first');
+
+      const res = await fetch('/api/user/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentUser.email, amount, upiId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Withdrawal request submitted! Pending admin release.');
+        loadDashboard();
+      } else {
+        alert(data.error);
+      }
+    }
+
+    // SAVE BANK DETAILS
+    async function saveUpiDetails() {
+      const upiId = document.getElementById('upiVpa').value.trim();
+      const bankName = document.getElementById('upiBank').value.trim();
+      const accountNo = document.getElementById('upiAcc').value.trim();
+      const ifsc = document.getElementById('upiIfsc').value.trim();
+
+      const res = await fetch('/api/user/add-upi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentUser.email, upiId, bankName, accountNo, ifsc })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Bank details registered successfully!');
+        loadDashboard();
+        switchTab('withdraw');
+      }
+    }
+
+    // ADMIN OVERVIEW
+    async function toggleAdminPanel() {
+      const modal = document.getElementById('adminPanelModal');
+      if (modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+        loadAdminData();
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    async function loadAdminData() {
+      const res = await fetch('/api/admin/overview');
+      const data = await res.json();
+
+      // Pending UTRs
+      const depList = document.getElementById('adminDepositsList');
+      depList.innerHTML = '';
+      const pending = data.deposits.filter(d => d.status === 'Pending');
+      if (pending.length === 0) {
+        depList.innerHTML = '<p class="text-slate-400">No pending UTR deposits.</p>';
+      } else {
+        pending.forEach(d => {
+          depList.innerHTML += `
+            <div class="p-2.5 border rounded-lg flex justify-between items-center bg-slate-50">
+              <div>
+                <p class="font-bold text-slate-800">${d.email}</p>
+                <p class="text-[11px] text-indigo-700 font-mono">UTR: ${d.utr} | Plan: ₹${d.amount}</p>
+              </div>
+              <button onclick="adminApproveDeposit('${d.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded font-bold text-xs">
+                Approve (Activate Plan & Credit)
+              </button>
+            </div>
+          `;
+        });
+      }
+
+      // Users List
+      const userContainer = document.getElementById('adminUsersList');
+      userContainer.innerHTML = '';
+      data.users.forEach(u => {
+        userContainer.innerHTML += `
+          <div class="p-2 border rounded flex justify-between items-center">
+            <span><strong>${u.email}</strong> (Code: ${u.myReferralCode})</span>
+            <span class="font-bold text-indigo-600">Balance: ₹${u.balance}</span>
+          </div>
+        `;
+      });
+    }
+
+    async function adminApproveDeposit(depositId) {
+      const res = await fetch('/api/admin/approve-deposit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ depositId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        loadAdminData();
+        if (currentUser) loadDashboard();
+      }
+    }
+
+    async function adminAdjustBalance() {
+      const email = document.getElementById('adminCreditEmail').value.trim();
+      const amount = document.getElementById('adminCreditAmount').value.trim();
+      if (!email || !amount) return alert('Enter email and amount');
+
+      const res = await fetch('/api/admin/adjust-balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amount })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        loadAdminData();
+        if (currentUser) loadDashboard();
+      }
+    }
   </script>
 </body>
 </html>
