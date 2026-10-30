@@ -78,6 +78,11 @@ function verifyAuth(req, res, next) {
   }
 }
 
+// --- ROOT ROUTE: DIRECTLY SERVE PAYMENT.HTML ---
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'payment.html'));
+});
+
 // --- 1. REGISTRATION OTP ---
 app.post('/api/send-otp', async (req, res) => {
   const { email } = req.body;
@@ -113,7 +118,7 @@ app.post('/api/register', (req, res) => {
   const newUser = {
     id: 'user_' + Date.now(),
     email,
-    password, // Store credentials permanently
+    password,
     points: 0,
     role: email === 'halthaf261@gmail.com' ? 'admin' : 'user',
     createdAt: new Date().toISOString()
@@ -239,7 +244,7 @@ app.get('/api/admin/data', verifyAuth, (req, res) => {
 
 // --- 9. ADMIN: APPROVE OR REJECT UTR & CREDIT POINTS ---
 app.post('/api/admin/action-utr', verifyAuth, (req, res) => {
-  const { transactionId, action } = req.body; // action: 'APPROVE' or 'REJECT'
+  const { transactionId, action } = req.body;
   const db = loadDB();
 
   const user = db.users.find(u => u.id === req.user.id);
@@ -263,6 +268,11 @@ app.post('/api/admin/action-utr', verifyAuth, (req, res) => {
 
   saveDB(db);
   res.json({ message: `Transaction has been ${action.toLowerCase()}d successfully` });
+});
+
+// --- FALLBACK ROUTE: CATCH-ALL TO SERVE HTML ---
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'payment.html'));
 });
 
 app.listen(PORT, () => {
