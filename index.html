@@ -1,707 +1,419 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ACPay | P2P Platform</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>ACPay - Secure Trading Terminal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    * { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; display: flex; justify-content: center; padding: 25px 15px; }
+    .container { width: 100%; max-width: 680px; background: #1e293b; border-radius: 14px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    h1, h2, h3 { color: #38bdf8; margin-bottom: 12px; }
+    .nav { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 12px; flex-wrap: wrap; }
+    .nav button { background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .nav button.active { background: #0284c7; color: #fff; border-color: #0284c7; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 6px; font-size: 13px; color: #cbd5e1; }
+    input, select { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 14px; }
+    button.btn-primary { width: 100%; padding: 12px; background: #0284c7; border: none; border-radius: 6px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+    button.btn-primary:hover { background: #0369a1; }
+    .card { background: #0f172a; border: 1px solid #334155; padding: 18px; border-radius: 8px; margin-bottom: 15px; }
+    .scanner-box { text-align: center; margin: 15px 0; }
+    .scanner-box img { max-width: 220px; border-radius: 8px; border: 2px solid #38bdf8; background: #fff; padding: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+    th, td { border: 1px solid #334155; padding: 8px 10px; text-align: left; }
+    th { background: #0f172a; color: #38bdf8; }
+    .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .badge.PENDING { background: #ca8a04; color: #000; }
+    .badge.APPROVED { background: #16a34a; color: #fff; }
+    .badge.REJECTED { background: #dc2626; color: #fff; }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex justify-center text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+<body>
 
-  <div class="w-full max-w-md bg-[#f6f7fb] min-h-screen flex flex-col justify-between shadow-2xl relative border-x border-slate-200">
-
-    <!-- 1. AUTH SCREEN: SIGN-IN & REGISTRATION -->
-    <div id="view-auth" class="flex flex-col justify-between h-full min-h-screen p-6 bg-white">
-      <div class="pt-6">
-        <div class="flex items-center gap-2 mb-2">
-          <div class="w-9 h-9 rounded-2xl bg-[#6440fe] text-white flex items-center justify-center font-extrabold shadow-md">
-            <i class="fa-solid fa-bolt"></i>
-          </div>
-          <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">ACPay Terminal</h1>
-        </div>
-        
-        <div class="flex bg-slate-100 p-1 rounded-2xl mt-4 border border-slate-200">
-          <button id="tab-btn-signin" onclick="switchAuthTab('signin')" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-white text-[#6440fe] shadow-sm transition">Sign In</button>
-          <button id="tab-btn-register" onclick="switchAuthTab('register')" class="flex-1 py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:text-slate-900 transition">Register Account</button>
-        </div>
-      </div>
-
-      <!-- SIGN IN FORM -->
-      <div id="auth-form-signin" class="space-y-4 my-auto">
-        <div class="space-y-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Registered Gmail</label>
-            <div class="flex items-center border border-slate-200 rounded-2xl px-4 py-3 bg-white focus-within:border-indigo-600 transition shadow-sm">
-              <span class="text-sm text-slate-400 pr-3 border-r border-slate-200"><i class="fa-regular fa-envelope"></i></span>
-              <input id="signin-email" type="email" placeholder="example@gmail.com" class="w-full pl-3 text-sm font-bold text-slate-900 outline-none">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Password</label>
-            <div class="relative flex items-center border border-slate-200 rounded-2xl px-4 py-3 bg-white focus-within:border-indigo-600 transition shadow-sm">
-              <input id="signin-password" type="password" placeholder="Enter your password" class="w-full pr-8 text-sm font-medium text-slate-900 outline-none">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Sign-In Security OTP</label>
-            <div class="relative flex items-center border border-slate-200 rounded-2xl pl-4 pr-1.5 py-1.5 bg-white focus-within:border-indigo-600 transition shadow-sm">
-              <input id="signin-otp" type="text" maxlength="6" placeholder="6-digit code" class="w-full text-sm font-mono font-bold text-slate-900 outline-none">
-              <button id="btn-signin-send-otp" onclick="requestLoginOtp()" class="bg-indigo-50 hover:bg-indigo-100 text-[#6440fe] px-4 py-2.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer">
-                Send OTP
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <button onclick="performSignIn()" class="w-full bg-[#6440fe] hover:bg-[#522fe6] active:scale-98 text-white font-bold py-3.5 rounded-2xl text-sm shadow-lg shadow-indigo-600/30 transition cursor-pointer mt-2">
-          Verify & Sign In
-        </button>
-      </div>
-
-      <!-- REGISTER FORM -->
-      <div id="auth-form-register" class="hidden space-y-4 my-auto">
-        <div class="space-y-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Gmail Address</label>
-            <div class="flex items-center border border-slate-200 rounded-2xl px-4 py-3 bg-white focus-within:border-indigo-600 transition shadow-sm">
-              <span class="text-sm text-slate-400 pr-3 border-r border-slate-200"><i class="fa-regular fa-envelope"></i></span>
-              <input id="reg-email" type="email" placeholder="Enter your Gmail address" class="w-full pl-3 text-sm font-bold text-slate-900 outline-none">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Friend's Referral Code (Optional)</label>
-            <div class="flex items-center border border-amber-300 rounded-2xl px-4 py-3 bg-amber-50/40 focus-within:border-amber-500 transition shadow-sm">
-              <span class="text-sm text-amber-500 pr-3 border-r border-amber-200"><i class="fa-solid fa-gift"></i></span>
-              <input id="reg-ref-code" type="text" placeholder="e.g. AC-XXXXX" class="w-full pl-3 text-sm font-mono uppercase font-bold text-slate-900 outline-none">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Verification OTP</label>
-            <div class="relative flex items-center border border-slate-200 rounded-2xl pl-4 pr-1.5 py-1.5 bg-white focus-within:border-indigo-600 transition shadow-sm">
-              <input id="reg-otp" type="text" maxlength="6" placeholder="Enter OTP from Gmail" class="w-full text-sm font-mono font-bold text-slate-900 outline-none">
-              <button id="btn-reg-send-otp" onclick="requestRegisterOtp()" class="bg-indigo-50 hover:bg-indigo-100 text-[#6440fe] px-4 py-2.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer">
-                Send OTP
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Create Password</label>
-            <div class="relative flex items-center border border-slate-200 rounded-2xl px-4 py-3 bg-white focus-within:border-indigo-600 transition shadow-sm">
-              <input id="reg-password" type="password" placeholder="Create strong password" class="w-full pr-8 text-sm font-medium text-slate-900 outline-none">
-            </div>
-          </div>
-        </div>
-
-        <button onclick="performRegistration()" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-bold py-3.5 rounded-2xl text-sm shadow-lg shadow-emerald-600/30 transition cursor-pointer mt-2">
-          Create Account & Proceed
-        </button>
-      </div>
-
-      <div class="text-center text-[10px] text-slate-400 pb-2">
-        Protected by ACPay Real Gmail OTP Verification
-      </div>
-    </div>
-
-    <!-- 2. MAIN APPLICATION WORKSPACE -->
-    <div id="view-dashboard" class="hidden flex-1 flex flex-col justify-between min-h-screen bg-[#f6f7fb]">
-      
-      <!-- Top Bar -->
-      <header class="bg-white px-4 pt-3 pb-2 sticky top-0 z-20 shadow-sm border-b border-slate-100">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-amber-200 border border-white shadow flex items-center justify-center text-slate-800 text-xs font-black">
-              <i class="fa-solid fa-user"></i>
-            </div>
-            <div>
-              <div class="flex items-center gap-1.5">
-                <span class="text-[11px] font-extrabold text-slate-800">UID: <span id="top-uid" class="font-mono">342566</span></span>
-                <span class="text-[9px] bg-slate-100 text-indigo-700 px-1.5 py-0.2 rounded font-black border border-indigo-200/60">Lv.1</span>
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="openReferralTaskModal()" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 border border-amber-300">
-              <i class="fa-solid fa-user-plus text-amber-600"></i> Invite & Earn
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <!-- Scrollable Main View -->
-      <main class="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
-        
-        <!-- HOME TAB -->
-        <div id="tab-content-home" class="space-y-4">
-          
-          <!-- Balance Card -->
-          <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-4">
-            <div class="flex justify-between items-center">
-              <div>
-                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">My Balance</span>
-                <div class="flex items-baseline gap-1 mt-0.5">
-                  <span id="dash-balance" class="text-3xl font-extrabold text-slate-900 font-mono">0.00</span>
-                  <span class="text-xs font-extrabold text-slate-400">INR</span>
-                </div>
-              </div>
-              <button onclick="openWithdrawModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-2xl text-xs font-bold shadow-md transition cursor-pointer">
-                Withdraw
-              </button>
-            </div>
-
-            <div class="flex justify-between items-center text-xs text-slate-500 pt-1 border-t border-slate-100">
-              <span>Bound Accounts: <b id="dash-upi-count" class="text-slate-800 font-mono">0</b></span>
-              <span class="text-[#6440fe] font-bold cursor-pointer hover:underline" onclick="openAddUpiModal()">+ Add UPI / Bank</span>
-            </div>
-
-            <!-- Quick Action Grid -->
-            <div class="grid grid-cols-4 gap-2 pt-2 text-center text-xs font-bold text-slate-700">
-              <div onclick="switchNav('buy-market')" class="flex flex-col items-center gap-1.5 cursor-pointer">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-[#6440fe] flex items-center justify-center text-lg shadow-sm">
-                  <i class="fa-solid fa-cart-shopping"></i>
-                </div>
-                <span class="text-[11px]">Buy Plans</span>
-              </div>
-              <div onclick="openWithdrawModal()" class="flex flex-col items-center gap-1.5 cursor-pointer">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-[#6440fe] flex items-center justify-center text-lg shadow-sm">
-                  <i class="fa-solid fa-money-bill-transfer"></i>
-                </div>
-                <span class="text-[11px]">Withdraw</span>
-              </div>
-              <div onclick="openAddUpiModal()" class="flex flex-col items-center gap-1.5 cursor-pointer">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-[#6440fe] flex items-center justify-center text-lg shadow-sm">
-                  <i class="fa-solid fa-building-columns"></i>
-                </div>
-                <span class="text-[11px]">Add UPI</span>
-              </div>
-              <div onclick="switchNav('orders')" class="flex flex-col items-center gap-1.5 cursor-pointer">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-[#6440fe] flex items-center justify-center text-lg shadow-sm">
-                  <i class="fa-solid fa-chart-line"></i>
-                </div>
-                <span class="text-[11px]">Activity</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Referral Task Banner -->
-          <div onclick="openReferralTaskModal()" class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-3xl p-4 text-white shadow-md cursor-pointer flex justify-between items-center">
-            <div class="space-y-1">
-              <span class="text-[9px] bg-black/20 px-2 py-0.5 rounded font-black uppercase">Referral Task</span>
-              <h3 class="text-sm font-extrabold leading-tight">Refer Friend & Get 30% + ₹800</h3>
-              <p class="text-[10px] text-amber-100">When friend buys plan, receive incentive directly in wallet!</p>
-            </div>
-            <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-lg">
-              <i class="fa-solid fa-gift"></i>
-            </div>
-          </div>
-
-          <!-- 5 Investment Packages: Directly trigger Scanner Gateway -->
-          <div>
-            <div class="flex justify-between items-center mb-3">
-              <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Available Investment Plans</h2>
-              <span class="text-[10px] text-indigo-600 font-bold">24h Lock</span>
-            </div>
-            <div id="buy-packages-list" class="space-y-3"></div>
-          </div>
-        </div>
-
-        <!-- BUY MARKET TAB -->
-        <div id="tab-content-buy-market" class="hidden space-y-3">
-          <div class="bg-white p-4 rounded-3xl border border-slate-200">
-            <h3 class="font-bold text-sm text-slate-800 mb-1">Buy Investment Package</h3>
-            <p class="text-xs text-slate-500">Tap Buy Plan on any tier to open the payment gateway with scanners.</p>
-          </div>
-          <div id="p2p-orders-container" class="space-y-3"></div>
-        </div>
-
-        <!-- ORDERS / ACTIVITY TAB -->
-        <div id="tab-content-orders" class="hidden space-y-4">
-          <div class="bg-white p-4 rounded-3xl border border-slate-200">
-            <h3 class="text-sm font-bold text-slate-900">User Activity History</h3>
-            <p class="text-xs text-slate-500">Purchased plans, returns, and referral earnings.</p>
-          </div>
-          <div id="activity-log-container" class="space-y-2"></div>
-        </div>
-
-        <!-- MY PROFILE TAB -->
-        <div id="tab-content-my" class="hidden space-y-4">
-          <div class="bg-gradient-to-r from-slate-900 to-[#1e1b4b] rounded-3xl p-5 text-white space-y-4 shadow-lg">
-            <div class="flex items-center gap-3">
-              <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 font-extrabold text-xl flex items-center justify-center shadow-md">
-                <i class="fa-solid fa-user"></i>
-              </div>
-              <div>
-                <h2 id="my-email" class="text-sm font-extrabold tracking-wide truncate max-w-[200px]">user@gmail.com</h2>
-                <div class="flex items-center gap-2 mt-1">
-                  <span class="text-[10px] text-slate-400 font-mono">UID: <span id="my-uid">342566</span></span>
-                  <span class="text-[9px] bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 px-2 py-0.2 rounded font-bold">Lv.1 Novice</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800 text-xs">
-              <div>
-                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Today's Earn</span>
-                <span id="my-today-earn" class="text-xl font-bold font-mono text-emerald-400">₹0.00</span>
-              </div>
-              <div class="text-right">
-                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Total's Earn</span>
-                <span id="my-total-earn" class="text-xl font-bold font-mono text-emerald-400">₹0.00</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-            <div onclick="openReferralTaskModal()" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-slate-50">
-              <span class="flex items-center gap-3"><i class="fa-solid fa-share-nodes text-amber-500"></i> My Referral Pass & Code</span>
-              <span id="my-ref-code-badge" class="font-mono text-indigo-600 font-bold">AC-XXXX &gt;</span>
-            </div>
-            <div onclick="openAddUpiModal()" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-slate-50">
-              <span class="flex items-center gap-3"><i class="fa-solid fa-building-columns text-[#6440fe]"></i> Bound UPI / Bank Details</span>
-              <span id="my-upi-badge" class="text-slate-400 font-mono">0 Accounts &gt;</span>
-            </div>
-            <div onclick="location.reload()" class="p-3.5 flex justify-between items-center cursor-pointer text-rose-600 hover:bg-rose-50">
-              <span class="flex items-center gap-3"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</span>
-              <span>&gt;</span>
-            </div>
-          </div>
-        </div>
-
-      </main>
-
-      <!-- Bottom Nav -->
-      <footer class="bg-white border-t border-slate-200 px-6 py-2.5 flex justify-between items-center text-[10px] font-bold text-slate-400 sticky bottom-0 z-20 shadow-lg">
-        <button onclick="switchNav('home')" id="nav-btn-home" class="flex flex-col items-center gap-1 text-[#6440fe]">
-          <i class="fa-solid fa-house text-base"></i>
-          <span>Home</span>
-        </button>
-        <button onclick="switchNav('orders')" id="nav-btn-orders" class="flex flex-col items-center gap-1 hover:text-slate-800">
-          <i class="fa-solid fa-file-invoice text-base"></i>
-          <span>Activity</span>
-        </button>
-        <button onclick="switchNav('buy-market')" id="nav-btn-market" class="flex flex-col items-center gap-1 hover:text-slate-800">
-          <div class="w-9 h-9 rounded-full bg-[#6440fe] text-white flex items-center justify-center text-sm -mt-4 shadow-md">
-            <i class="fa-solid fa-cart-plus"></i>
-          </div>
-          <span class="mt-0.5">Buy</span>
-        </button>
-        <button onclick="openWithdrawModal()" class="flex flex-col items-center gap-1 hover:text-slate-800">
-          <i class="fa-solid fa-money-bill-transfer text-base"></i>
-          <span>Withdraw</span>
-        </button>
-        <button onclick="switchNav('my')" id="nav-btn-my" class="flex flex-col items-center gap-1 hover:text-slate-800">
-          <i class="fa-solid fa-user text-base"></i>
-          <span>My</span>
-        </button>
-      </footer>
-    </div>
-
-    <!-- MODAL: REFERRAL TASK -->
-    <div id="modal-referral-task" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
-        <button onclick="closeReferralTaskModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-
-        <div class="text-center space-y-1">
-          <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl mx-auto mb-2">
-            <i class="fa-solid fa-user-plus"></i>
-          </div>
-          <h3 class="text-sm font-bold text-slate-900">Refer Friend & Earn</h3>
-          <p class="text-xs text-slate-500">When your friend registers and takes a mandatory plan, you get <b>30% of their plan + ₹800 bonus</b>!</p>
-        </div>
-
-        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-center space-y-1">
-          <span class="text-[10px] text-amber-700 font-bold uppercase">Your Unique Referral Code</span>
-          <div class="flex items-center justify-center gap-3">
-            <span id="user-display-refcode" class="text-xl font-black font-mono tracking-wider text-amber-800">AC-XXXXX</span>
-            <button onclick="copyRefCode()" class="bg-amber-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold">Copy</button>
-          </div>
-        </div>
-
-        <div class="text-[11px] text-slate-500 space-y-1 bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <p>• Incentives & balance are available for withdrawal after <b>24 hours</b>.</p>
-          <p>• Bind your UPI/Bank details to receive withdrawal payments directly.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL: WITHDRAWAL REQUEST -->
-    <div id="modal-withdraw" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
-        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-          <h3 class="text-sm font-bold text-slate-900">Withdraw Funds</h3>
-          <button onclick="closeWithdrawModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="block font-bold text-slate-500 mb-1">Available Balance</label>
-            <span id="withdraw-modal-bal" class="text-xl font-black font-mono text-emerald-600">₹0.00</span>
-          </div>
-
-          <div>
-            <label class="block font-bold text-slate-500 mb-1">Select Bound UPI / Account</label>
-            <select id="withdraw-account-select" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none font-mono"></select>
-          </div>
-
-          <div>
-            <label class="block font-bold text-slate-500 mb-1">Withdrawal Amount (₹)</label>
-            <input id="withdraw-amount-input" type="number" placeholder="Enter amount" class="w-full border border-slate-200 rounded-xl p-2.5 text-sm font-bold font-mono outline-none focus:border-indigo-600">
-          </div>
-
-          <p class="text-[10px] text-slate-400">*Withdrawals process to your verified bank within 24h.</p>
-        </div>
-
-        <button onclick="submitWithdrawal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs transition">
-          Confirm & Submit to Admin
-        </button>
-      </div>
-    </div>
-
-    <!-- MODAL: ADD UPI WALLET -->
-    <div id="modal-add-upi" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
-        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-          <h3 class="text-sm font-bold text-slate-800">Add UPI / Bank Details</h3>
-          <button onclick="closeAddUpiModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="block font-bold text-slate-500 mb-1">UPI VPA Address</label>
-            <input id="input-new-upi" type="text" placeholder="e.g. 9381136860@ybl" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold outline-none focus:border-indigo-600">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-500 mb-1">Bank Name</label>
-            <input id="input-bank-name" type="text" placeholder="e.g. State Bank of India" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-indigo-600">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-500 mb-1">Account Number (Optional)</label>
-            <input id="input-acc-num" type="text" placeholder="e.g. 42971394203" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold outline-none focus:border-indigo-600">
-          </div>
-        </div>
-        <button onclick="submitNewUpi()" class="w-full bg-[#6440fe] hover:bg-[#522fe6] text-white font-bold py-2.5 rounded-xl text-xs transition">
-          Bind & Verify Account
-        </button>
-      </div>
-    </div>
-
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <h2>ACPay Terminal</h2>
+    <div id="session-info" style="font-size: 13px; color: #38bdf8;"></div>
   </div>
 
-  <script>
-    let currentUser = null;
-    let availablePackages = [];
+  <div class="nav">
+    <button id="tab-auth" class="active" onclick="switchTab('auth')">Login / Register</button>
+    <button id="tab-payment" onclick="switchTab('payment')">Deposit & UTR</button>
+    <button id="tab-admin" onclick="switchTab('admin')">Admin Ledger</button>
+  </div>
 
-    function switchAuthTab(tab) {
-      const isSignIn = tab === 'signin';
-      document.getElementById('auth-form-signin').classList.toggle('hidden', !isSignIn);
-      document.getElementById('auth-form-register').classList.toggle('hidden', isSignIn);
+  <!-- PANEL 1: AUTHENTICATION & FORGOT PASSWORD -->
+  <div id="panel-auth" class="panel active">
+    <!-- Login Section -->
+    <div id="login-sec">
+      <h3>Sign In to Your Account</h3>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" placeholder="name@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" onclick="handleLogin()">Login</button>
+      <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:13px;">
+        <a href="#" style="color:#38bdf8;" onclick="toggleAuthSub('register')">Create an Account</a>
+        <a href="#" style="color:#94a3b8;" onclick="toggleAuthSub('forgot')">Forgot Password?</a>
+      </div>
+    </div>
 
-      document.getElementById('tab-btn-signin').className = isSignIn
-        ? 'flex-1 py-2.5 rounded-xl font-bold text-xs bg-white text-[#6440fe] shadow-sm transition'
-        : 'flex-1 py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:text-slate-900 transition';
+    <!-- Registration Section -->
+    <div id="reg-sec" style="display:none;">
+      <h3>Create New Account</h3>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="reg-email" placeholder="name@example.com">
+      </div>
+      <button type="button" style="padding: 6px 12px; background: #334155; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 12px;" onclick="sendRegOTP()">Send OTP</button>
+      <div class="form-group">
+        <label>6-Digit OTP</label>
+        <input type="text" id="reg-otp" placeholder="123456" maxlength="6">
+      </div>
+      <div class="form-group">
+        <label>Set Password</label>
+        <input type="password" id="reg-password" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" onclick="handleRegister()">Complete Registration</button>
+      <div style="margin-top:12px; font-size:13px;">
+        <a href="#" style="color:#38bdf8;" onclick="toggleAuthSub('login')">Already have an account? Log in</a>
+      </div>
+    </div>
 
-      document.getElementById('tab-btn-register').className = !isSignIn
-        ? 'flex-1 py-2.5 rounded-xl font-bold text-xs bg-white text-emerald-600 shadow-sm transition'
-        : 'flex-1 py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:text-slate-900 transition';
+    <!-- Forgot Password Section -->
+    <div id="forgot-sec" style="display:none;">
+      <h3>Reset Your Password</h3>
+      <div class="form-group">
+        <label>Registered Email</label>
+        <input type="email" id="forgot-email" placeholder="name@example.com">
+      </div>
+      <button type="button" style="padding: 6px 12px; background: #334155; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 12px;" onclick="sendForgotOTP()">Send Reset OTP</button>
+      <div class="form-group">
+        <label>Enter 6-Digit OTP</label>
+        <input type="text" id="forgot-otp" placeholder="123456" maxlength="6">
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="forgot-newpass" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" onclick="handleResetPassword()">Update Password</button>
+      <div style="margin-top:12px; font-size:13px;">
+        <a href="#" style="color:#38bdf8;" onclick="toggleAuthSub('login')">Back to Login</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2: PAYMENT & 12-DIGIT UTR SUBMISSION -->
+  <div id="panel-payment" class="panel">
+    <h3>Deposit & Upgrade Tier</h3>
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+        <span>Your Balance / Points:</span>
+        <strong id="user-points" style="color: #4ade80;">0 Points</strong>
+      </div>
+      <div class="form-group">
+        <label>Select Plan Tier</label>
+        <select id="plan-select" onchange="updatePlanAmount()">
+          <option value="18500">Tier 1 Plan - ₹18,500 (18,500 Points)</option>
+          <option value="35000">Tier 2 Plan - ₹35,000 (35,000 Points)</option>
+          <option value="50000">Tier 3 Plan - ₹50,000 (50,000 Points)</option>
+        </select>
+      </div>
+
+      <div class="scanner-box">
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">Scan UPI QR Code to Complete Payment</p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=acpay@sbi&pn=ACPay%20Services&am=18500" id="qr-image" alt="UPI QR">
+        <div style="margin-top: 8px; font-size: 13px; color: #cbd5e1;">
+          <p><strong>UPI ID:</strong> <code>acpay@sbi</code></p>
+          <p><strong>Bank Account:</strong> 30012345678 (State Bank of India)</p>
+          <p><strong>IFSC:</strong> SBIN0000847</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Enter 12-Digit UTR / Bank Reference Number</label>
+        <input type="text" id="utr-input" placeholder="e.g. 430123456789" maxlength="12">
+        <span style="font-size:11px; color:#94a3b8;">Find the 12-digit reference number in your GPay / PhonePe / Paytm / YONO receipt.</span>
+      </div>
+      <button class="btn-primary" onclick="submitUTR()">Submit 12-Digit UTR for Verification</button>
+    </div>
+  </div>
+
+  <!-- PANEL 3: ADMIN LEDGER -->
+  <div id="panel-admin" class="panel">
+    <h3>Admin Dashboard & Transaction Queue</h3>
+    <button style="padding: 6px 12px; background: #334155; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 12px;" onclick="loadAdminData()">Refresh Records</button>
+    
+    <h4 style="margin-top: 10px; color: #e2e8f0;">Submitted Payments Queue</h4>
+    <div style="overflow-x: auto;">
+      <table id="tx-table">
+        <thead>
+          <tr>
+            <th>User Email</th>
+            <th>Amount</th>
+            <th>12-Digit UTR</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top: 25px; color: #e2e8f0;">Registered Users Ledger</h4>
+    <div style="overflow-x: auto;">
+      <table id="users-table">
+        <thead>
+          <tr>
+            <th>User Email</th>
+            <th>Current Balance</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  let token = localStorage.getItem('acpay_token');
+
+  function switchTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(`panel-${name}`).classList.add('active');
+    document.getElementById(`tab-${name}`).classList.add('active');
+
+    if (name === 'payment') checkUserSession();
+    if (name === 'admin') loadAdminData();
+  }
+
+  function toggleAuthSub(view) {
+    document.getElementById('login-sec').style.display = view === 'login' ? 'block' : 'none';
+    document.getElementById('reg-sec').style.display = view === 'register' ? 'block' : 'none';
+    document.getElementById('forgot-sec').style.display = view === 'forgot' ? 'block' : 'none';
+  }
+
+  function updatePlanAmount() {
+    const amt = document.getElementById('plan-select').value;
+    document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=acpay@sbi&pn=ACPay%20Services&am=${amt}`;
+  }
+
+  async function checkUserSession() {
+    if (!token) {
+      alert('Please log in first to access payments and balance.');
+      switchTab('auth');
+      return;
     }
-
-    async function requestRegisterOtp() {
-      const email = document.getElementById('reg-email').value.trim();
-      if (!email || !email.includes('@')) return alert('Please enter a valid Gmail address');
-
-      const btn = document.getElementById('btn-reg-send-otp');
-      btn.innerText = 'Sending...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch('/api/auth/register-send-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
+    try {
+      const res = await fetch('/api/user/profile', { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
         const data = await res.json();
-        if (data.success) {
-          alert('Registration OTP sent to your Gmail inbox!');
-          btn.innerText = 'Sent';
-        } else {
-          alert(data.error || 'Failed to dispatch email');
-          btn.innerText = 'Send OTP';
-          btn.disabled = false;
-        }
-      } catch (err) {
-        alert('Server unreachable');
-        btn.innerText = 'Send OTP';
-        btn.disabled = false;
-      }
-    }
-
-    async function performRegistration() {
-      const email = document.getElementById('reg-email').value.trim();
-      const otp = document.getElementById('reg-otp').value.trim();
-      const password = document.getElementById('reg-password').value.trim();
-      const refCode = document.getElementById('reg-ref-code').value.trim();
-
-      if (!email || !otp || !password) return alert('Fill in all fields');
-
-      const res = await fetch('/api/auth/register-create-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp, password, referralCode: refCode })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(data.message);
-        document.getElementById('signin-email').value = email;
-        document.getElementById('signin-password').value = password;
-        switchAuthTab('signin');
+        document.getElementById('session-info').innerText = `${data.email} (${data.role})`;
+        document.getElementById('user-points').innerText = `${data.points} Points`;
       } else {
-        alert(data.error);
+        localStorage.removeItem('acpay_token');
+        token = null;
+        switchTab('auth');
       }
+    } catch (e) {
+      console.warn('Session check failed:', e.message);
     }
+  }
 
-    async function requestLoginOtp() {
-      const email = document.getElementById('signin-email').value.trim();
-      const password = document.getElementById('signin-password').value.trim();
+  async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return alert('Please enter both email and password');
 
-      if (!email || !password) return alert('Enter email and password first');
-
-      const btn = document.getElementById('btn-signin-send-otp');
-      btn.innerText = 'Sending...';
-      btn.disabled = true;
-
-      const res = await fetch('/api/auth/login-send-otp', {
+    try {
+      const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (data.success) {
-        alert('Sign-In security OTP sent to your Gmail!');
-        btn.innerText = 'Sent';
+      if (res.ok) {
+        token = data.token;
+        localStorage.setItem('acpay_token', token);
+        alert('Login successful');
+        switchTab('payment');
       } else {
-        alert(data.error);
-        btn.innerText = 'Send OTP';
-        btn.disabled = false;
+        alert(data.error || 'Login failed');
       }
+    } catch (e) {
+      alert('Unable to reach server. Please wait 15 seconds and try again.');
     }
+  }
 
-    async function performSignIn() {
-      const email = document.getElementById('signin-email').value.trim();
-      const password = document.getElementById('signin-password').value.trim();
-      const otp = document.getElementById('signin-otp').value.trim();
-
-      if (!email || !password || !otp) return alert('Enter all credentials');
-
-      const res = await fetch('/api/auth/login-verify', {
+  async function sendRegOTP() {
+    const email = document.getElementById('reg-email').value.trim();
+    if (!email) return alert('Enter email first');
+    try {
+      const res = await fetch('/api/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, otp })
+        body: JSON.stringify({ email })
       });
       const data = await res.json();
-      if (data.success) {
-        currentUser = data.user;
-        document.getElementById('view-auth').classList.add('hidden');
-        document.getElementById('view-dashboard').classList.remove('hidden');
-        syncUserDataUI();
-        loadPackages();
-        loadActivityLogs();
+      if (res.ok) {
+        alert('OTP sent successfully to your email');
       } else {
-        alert(data.error);
+        alert(data.error || 'Failed to send OTP');
       }
+    } catch (e) {
+      alert('Unable to reach server. Please wait 15 seconds and try again.');
     }
+  }
 
-    function syncUserDataUI() {
-      if (!currentUser) return;
-      document.getElementById('top-uid').innerText = currentUser.uid;
-      document.getElementById('my-uid').innerText = currentUser.uid;
-      document.getElementById('my-email').innerText = currentUser.email;
-      document.getElementById('dash-balance').innerText = Number(currentUser.balance).toFixed(2);
-      document.getElementById('my-today-earn').innerText = `₹${Number(currentUser.todayEarn).toFixed(2)}`;
-      document.getElementById('my-total-earn').innerText = `₹${Number(currentUser.totalEarn).toFixed(2)}`;
-      document.getElementById('dash-upi-count').innerText = currentUser.upiList.length;
-      document.getElementById('my-upi-badge').innerText = `${currentUser.upiList.length} Bound >`;
-      document.getElementById('my-ref-code-badge').innerText = `${currentUser.myReferralCode} >`;
-      document.getElementById('user-display-refcode').innerText = currentUser.myReferralCode;
-    }
+  async function handleRegister() {
+    const email = document.getElementById('reg-email').value.trim();
+    const otp = document.getElementById('reg-otp').value.trim();
+    const password = document.getElementById('reg-password').value;
+    if (!email || !otp || !password) return alert('Please fill in all fields');
 
-    async function loadPackages() {
-      const res = await fetch('/api/packages/list');
-      const data = await res.json();
-      if (data.success) {
-        availablePackages = data.packages;
-        renderPackages(data.packages);
-      }
-    }
-
-    // Direct routing: Clicking Buy Plan opens payment page with the exact plan amount
-    function renderPackages(pkgs) {
-      const c1 = document.getElementById('buy-packages-list');
-      const c2 = document.getElementById('p2p-orders-container');
-      c1.innerHTML = '';
-      c2.innerHTML = '';
-
-      pkgs.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'bg-white border border-slate-200/80 rounded-2xl p-4 flex justify-between items-center shadow-sm';
-        div.innerHTML = `
-          <div>
-            <span class="text-xs font-bold text-slate-800 block">${p.title}</span>
-            <span class="text-lg font-black font-mono text-slate-900 block">₹${p.amount.toLocaleString()}</span>
-            <span class="text-[10px] text-emerald-600 font-bold block mt-0.5">+₹${p.dailyIncome}/day return</span>
-          </div>
-          <button onclick="goToScannerPayment(${p.amount}, '${p.id}')" class="bg-[#6440fe] hover:bg-[#522fe6] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition cursor-pointer">
-            Buy Plan
-          </button>
-        `;
-        c1.appendChild(div);
-        c2.appendChild(div.cloneNode(true));
-      });
-    }
-
-    function goToScannerPayment(amount, planId) {
-      if (!currentUser || !currentUser.email) return alert('Please sign in first');
-      const targetUrl = `/payment?amount=${amount}&email=${encodeURIComponent(currentUser.email)}&planId=${planId}`;
-      window.open(targetUrl, '_blank');
-    }
-
-    async function loadActivityLogs() {
-      const res = await fetch(`/api/user/activity?email=${encodeURIComponent(currentUser.email)}`);
-      const data = await res.json();
-      const c = document.getElementById('activity-log-container');
-      c.innerHTML = '';
-
-      if (!data.logs || data.logs.length === 0) {
-        c.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No recent activity records.</p>';
-        return;
-      }
-
-      data.logs.forEach(l => {
-        const item = document.createElement('div');
-        item.className = 'bg-white p-3.5 rounded-2xl border border-slate-200 flex justify-between items-center text-xs';
-        item.innerHTML = `
-          <div>
-            <span class="font-bold text-slate-800 block">${l.action}</span>
-            <span class="text-[10px] text-slate-400 font-mono">${l.date} ${l.time}</span>
-          </div>
-          <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded font-bold">Processed</span>
-        `;
-        c.appendChild(item);
-      });
-    }
-
-    function openReferralTaskModal() {
-      document.getElementById('modal-referral-task').classList.remove('hidden');
-    }
-
-    function closeReferralTaskModal() {
-      document.getElementById('modal-referral-task').classList.add('hidden');
-    }
-
-    function copyRefCode() {
-      navigator.clipboard.writeText(currentUser.myReferralCode);
-      alert('Referral Code copied to clipboard!');
-    }
-
-    function openWithdrawModal() {
-      if (currentUser.upiList.length === 0) {
-        alert('Please add your UPI / Bank account first.');
-        openAddUpiModal();
-        return;
-      }
-      document.getElementById('withdraw-modal-bal').innerText = `₹${Number(currentUser.balance).toFixed(2)}`;
-      const sel = document.getElementById('withdraw-account-select');
-      sel.innerHTML = '';
-      currentUser.upiList.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.upiId;
-        opt.innerText = `${u.bankName} (${u.upiId})`;
-        sel.appendChild(opt);
-      });
-      document.getElementById('modal-withdraw').classList.remove('hidden');
-    }
-
-    function closeWithdrawModal() {
-      document.getElementById('modal-withdraw').classList.add('hidden');
-    }
-
-    async function submitWithdrawal() {
-      const amt = document.getElementById('withdraw-amount-input').value;
-      const upiId = document.getElementById('withdraw-account-select').value;
-
-      if (!amt || amt <= 0) return alert('Enter valid amount');
-
-      const res = await fetch('/api/user/withdraw', {
+    try {
+      const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentUser.email, amount: amt, upiId })
+        body: JSON.stringify({ email, otp, password })
       });
       const data = await res.json();
-      if (data.success) {
-        currentUser = data.user;
-        syncUserDataUI();
-        closeWithdrawModal();
+      if (res.ok) {
+        token = data.token;
+        localStorage.setItem('acpay_token', token);
+        alert('Account registered successfully');
+        switchTab('payment');
+      } else {
+        alert(data.error || 'Registration failed');
+      }
+    } catch (e) {
+      alert('Unable to reach server during registration.');
+    }
+  }
+
+  async function sendForgotOTP() {
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email) return alert('Enter your registered email');
+    try {
+      const res = await fetch('/api/forgot-password/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      alert(res.ok ? 'Reset code sent to your email' : (data.error || 'Failed to send reset OTP'));
+    } catch (e) {
+      alert('Unable to reach server sending reset OTP.');
+    }
+  }
+
+  async function handleResetPassword() {
+    const email = document.getElementById('forgot-email').value.trim();
+    const otp = document.getElementById('forgot-otp').value.trim();
+    const newPassword = document.getElementById('forgot-newpass').value;
+    if (!email || !otp || !newPassword) return alert('Please fill in all reset fields');
+
+    try {
+      const res = await fetch('/api/forgot-password/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp, newPassword })
+      });
+      const data = await res.json();
+      if (res.ok) {
         alert(data.message);
+        toggleAuthSub('login');
       } else {
-        alert(data.error);
+        alert(data.error || 'Reset failed');
       }
+    } catch (e) {
+      alert('Unable to reach server during password reset.');
     }
+  }
 
-    function openAddUpiModal() {
-      document.getElementById('modal-add-upi').classList.remove('hidden');
-    }
+  async function submitUTR() {
+    if (!token) return alert('Please login first');
+    const utr = document.getElementById('utr-input').value.trim();
+    const amount = document.getElementById('plan-select').value;
+    if (!/^\d{12}$/.test(utr)) return alert('UTR must be exactly 12 digits');
 
-    function closeAddUpiModal() {
-      document.getElementById('modal-add-upi').classList.add('hidden');
-    }
-
-    async function submitNewUpi() {
-      const upi = document.getElementById('input-new-upi').value.trim();
-      const bank = document.getElementById('input-bank-name').value.trim();
-      const acc = document.getElementById('input-acc-num').value.trim();
-
-      if (!upi || !bank) return alert('Please enter both UPI address and Bank name');
-
-      const res = await fetch('/api/user/add-upi', {
+    try {
+      const res = await fetch('/api/payment/submit-utr', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentUser.email, upiId: upi, bankName: bank, accNumber: acc })
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ utrNumber: utr, amount: amount, planName: 'Selected Tier' })
       });
       const data = await res.json();
-      if (data.success) {
-        currentUser.upiList = data.upiList;
-        syncUserDataUI();
-        closeAddUpiModal();
-        alert('Bank details registered successfully!');
-      }
+      alert(res.ok ? data.message : data.error);
+      if (res.ok) document.getElementById('utr-input').value = '';
+    } catch (e) {
+      alert('Unable to reach server submitting UTR.');
     }
+  }
 
-    function switchNav(nav) {
-      ['home', 'buy-market', 'orders', 'my'].forEach(t => {
-        const el = document.getElementById(`tab-content-${t}`);
-        if (el) el.classList.add('hidden');
+  async function loadAdminData() {
+    if (!token) return alert('Log in with admin account to view ledger');
+    try {
+      const res = await fetch('/api/admin/data', { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) return alert('Access restricted to Admin account');
+
+      const data = await res.json();
+      const txBody = document.querySelector('#tx-table tbody');
+      txBody.innerHTML = '';
+      data.transactions.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${t.userEmail}</td>
+          <td>₹${t.amount}</td>
+          <td><code>${t.utrNumber}</code></td>
+          <td><span class="badge ${t.status}">${t.status}</span></td>
+          <td>
+            ${t.status === 'PENDING' ? `
+              <button style="padding:4px 8px; background:#16a34a; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="processTx('${t.id}', 'APPROVE')">Approve</button>
+              <button style="padding:4px 8px; background:#dc2626; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="processTx('${t.id}', 'REJECT')">Reject</button>
+            ` : '-'}
+          </td>
+        `;
+        txBody.appendChild(tr);
       });
 
-      const target = document.getElementById(`tab-content-${nav}`);
-      if (target) target.classList.remove('hidden');
-
-      ['home', 'orders', 'market', 'my'].forEach(btn => {
-        const b = document.getElementById(`nav-btn-${btn}`);
-        if (b) b.className = 'flex flex-col items-center gap-1 hover:text-slate-800 text-slate-400';
+      const userBody = document.querySelector('#users-table tbody');
+      userBody.innerHTML = '';
+      data.users.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${u.email}</td><td><strong>${u.points} Points</strong></td><td>${u.role}</td>`;
+        userBody.appendChild(tr);
       });
-
-      const activeBtn = document.getElementById(`nav-btn-${nav === 'buy-market' ? 'market' : nav}`);
-      if (activeBtn) activeBtn.className = 'flex flex-col items-center gap-1 text-[#6440fe]';
+    } catch (e) {
+      alert('Failed to fetch admin data: Server unreachable.');
     }
-  </script>
+  }
+
+  async function processTx(id, action) {
+    try {
+      const res = await fetch('/api/admin/action-utr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ transactionId: id, action })
+      });
+      const data = await res.json();
+      alert(data.message || data.error);
+      loadAdminData();
+    } catch (e) {
+      alert('Failed to update transaction.');
+    }
+  }
+
+  if (token) checkUserSession();
+</script>
 </body>
 </html>
