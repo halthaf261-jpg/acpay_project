@@ -1,164 +1,407 @@
-.<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ACPay - Secure Trading Terminal</title>
+  <title>ACPay - Official Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #0f172a; color: #f8fafc; display: flex; justify-content: center; padding: 25px 15px; }
-    .container { width: 100%; max-width: 680px; background: #1e293b; border-radius: 14px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    h1, h2, h3 { color: #38bdf8; margin-bottom: 12px; }
-    .nav { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 12px; flex-wrap: wrap; }
-    .nav button { background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    .nav button.active { background: #0284c7; color: #fff; border-color: #0284c7; }
-    .panel { display: none; }
-    .panel.active { display: block; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 6px; font-size: 13px; color: #cbd5e1; }
-    input, select { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 14px; }
-    button.btn-primary { width: 100%; padding: 12px; background: #0284c7; border: none; border-radius: 6px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; }
-    button.btn-primary:hover { background: #0369a1; }
-    .card { background: #0f172a; border: 1px solid #334155; padding: 18px; border-radius: 8px; margin-bottom: 15px; }
-    .scanner-box { text-align: center; margin: 15px 0; }
-    .scanner-box img { max-width: 220px; border-radius: 8px; border: 2px solid #38bdf8; background: #fff; padding: 8px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-    th, td { border: 1px solid #334155; padding: 8px 10px; text-align: left; }
-    th { background: #0f172a; color: #38bdf8; }
-    .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-    .badge.PENDING { background: #ca8a04; color: #000; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background: #737b84;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 15px;
+    }
+    .card {
+      background: #e2e8f0;
+      width: 100%;
+      max-width: 440px;
+      border-radius: 12px;
+      padding: 30px 24px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: #94a3b8;
+      font-size: 15px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      background: #cbd5e1;
+      border: 1px solid #94a3b8;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #1e293b;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      border-color: #0d9488;
+      background: #d8e2ec;
+    }
+    .referral-group input {
+      border: 1.5px solid #d97706;
+      background: #e2e8f0;
+    }
+    .referral-group .input-icon {
+      color: #d97706;
+    }
+    .otp-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+    .otp-wrapper input {
+      padding-left: 14px;
+      border: 1.5px solid #6366f1;
+      background: #e2e8f0;
+    }
+    .btn-send-otp {
+      padding: 0 18px;
+      background: #4f46e5;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-send-otp:hover {
+      background: #4338ca;
+    }
+    .btn-send-otp:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: #064e3b;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover {
+      background: #04382a;
+    }
+    .footer-note {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11px;
+      color: #475569;
+    }
+    .links-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+    .links-row a {
+      color: #0369a1;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .links-row a:hover {
+      text-decoration: underline;
+    }
+    .view-section {
+      display: none;
+    }
+    .view-section.active {
+      display: block;
+    }
+    /* Dashboard & Wallet UI */
+    .wallet-box {
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 18px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .plan-item {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .scanner-box {
+      text-align: center;
+      margin: 15px 0;
+    }
+    .scanner-box img {
+      max-width: 200px;
+      border: 2px solid #0284c7;
+      border-radius: 8px;
+      background: #fff;
+      padding: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #334155;
+      color: #fff;
+    }
+    .badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .badge.PENDING { background: #eab308; color: #000; }
     .badge.APPROVED { background: #16a34a; color: #fff; }
     .badge.REJECTED { background: #dc2626; color: #fff; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-    <h2>ACPay Terminal</h2>
-    <div id="session-info" style="font-size: 13px; color: #38bdf8;"></div>
-  </div>
-
-  <div class="nav">
-    <button id="tab-auth" class="active" onclick="switchTab('auth')">Login / Register</button>
-    <button id="tab-payment" onclick="switchTab('payment')">Deposit & UTR</button>
-    <button id="tab-admin" onclick="switchTab('admin')">Admin Ledger</button>
-  </div>
-
-  <!-- PANEL 1: AUTHENTICATION & FORGOT PASSWORD -->
-  <div id="panel-auth" class="panel active">
-    <!-- Login Section -->
-    <div id="login-sec">
-      <h3>Sign In to Your Account</h3>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="login-email" placeholder="name@example.com">
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="login-password" placeholder="••••••••">
-      </div>
-      <button class="btn-primary" onclick="handleLogin()">Login</button>
-      <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:13px;">
-        <a href="#" style="color:#38bdf8;" onclick="toggleAuthSub('register')">Create an Account</a>
-        <a href="#" style="color:#94a3b8;" onclick="toggleAuthSub('forgot')">Forgot Password?</a>
+  <!-- VIEW 1: REGISTRATION (ORIGINAL DESIGN) -->
+  <div id="view-register" class="card view-section active">
+    <div class="form-group">
+      <label>Gmail Address</label>
+      <div class="input-wrapper">
+        <span class="input-icon">✉</span>
+        <input type="email" id="reg-email" placeholder="name@gmail.com" required>
       </div>
     </div>
 
-    <!-- Registration Section -->
-    <div id="reg-sec" style="display:none;">
-      <h3>Create New Account</h3>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="reg-email" placeholder="name@example.com">
-      </div>
-      <button type="button" style="padding: 6px 12px; background: #334155; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 12px;" onclick="sendRegOTP()">Send OTP</button>
-      <div class="form-group">
-        <label>6-Digit OTP</label>
-        <input type="text" id="reg-otp" placeholder="123456" maxlength="6">
-      </div>
-      <div class="form-group">
-        <label>Set Password</label>
-        <input type="password" id="reg-password" placeholder="••••••••">
-      </div>
-      <button class="btn-primary" onclick="handleRegister()">Complete Registration</button>
-      <div style="margin-top:12px; font-size:13px;">
-        <a href="#" style="color:#38bdf8;" onclick="toggleAuthSub('login')">Already have an account? Log in</a>
+    <div class="form-group referral-group">
+      <label>Friend's Referral Code (Optional)</label>
+      <div class="input-wrapper">
+        <span class="input-icon">🎁</span>
+        <input type="text" id="reg-referral" placeholder="E.G. AC-XXXXX">
       </div>
     </div>
 
-    <!-- Forgot Password Section -->
-    <div id="forgot-sec" style="display:none;">
-      <h3>Reset Your Password</h3>
-      <div class="form-group">
-        <label>Registered Email</label>
-        <input type="email" id="forgot-email" placeholder="name@example.com">
+    <div class="form-group">
+      <label>Verification OTP</label>
+      <div class="otp-wrapper">
+        <input type="text" id="reg-otp" placeholder="Enter OTP from Gmail" maxlength="6">
+        <button type="button" id="btn-reg-otp" class="btn-send-otp" onclick="handleSendRegisterOTP()">Send OTP</button>
       </div>
-      <button type="button" style="padding: 6px 12px; background: #334155; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 12px;" onclick="sendForgotOTP()">Send Reset OTP</button>
-      <div class="form-group">
-        <label>Enter 6-Digit OTP</label>
-        <input type="text" id="forgot-otp" placeholder="123456" maxlength="6">
+    </div>
+
+    <div class="form-group">
+      <label>Create Password</label>
+      <div class="input-wrapper">
+        <input type="password" id="reg-password" placeholder="Create strong password" style="padding-left: 14px;">
       </div>
-      <div class="form-group">
-        <label>New Password</label>
-        <input type="password" id="forgot-newpass" placeholder="••••••••">
-      </div>
-      <button class="btn-primary" onclick="handleResetPassword()">Update Password</button>
-      <div style="margin-top:12px; font-size:13px;">
-        <a href="#" style="color:#38bdf8;" onclick="toggleAuthSub('login')">Back to Login</a>
-      </div>
+    </div>
+
+    <button type="button" class="btn-submit" onclick="handleRegister()">Create Account & Proceed</button>
+
+    <div class="links-row">
+      <a onclick="switchView('login')">Already have an account? Sign In</a>
+      <a onclick="switchView('forgot')">Forgot Password?</a>
     </div>
   </div>
 
-  <!-- PANEL 2: PAYMENT & 12-DIGIT UTR SUBMISSION -->
-  <div id="panel-payment" class="panel">
-    <h3>Deposit & Upgrade Tier</h3>
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-        <span>Your Balance / Points:</span>
-        <strong id="user-points" style="color: #4ade80;">0 Points</strong>
+  <!-- VIEW 2: LOGIN -->
+  <div id="view-login" class="card view-section">
+    <div class="form-group">
+      <label>Registered Gmail Address</label>
+      <div class="input-wrapper">
+        <span class="input-icon">✉</span>
+        <input type="email" id="login-email" placeholder="name@gmail.com">
       </div>
-      <div class="form-group">
-        <label>Select Plan Tier</label>
-        <select id="plan-select" onchange="updatePlanAmount()">
-          <option value="18500">Tier 1 Plan - ₹18,500 (18,500 Points)</option>
-          <option value="35000">Tier 2 Plan - ₹35,000 (35,000 Points)</option>
-          <option value="50000">Tier 3 Plan - ₹50,000 (50,000 Points)</option>
-        </select>
-      </div>
+    </div>
 
-      <div class="scanner-box">
-        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">Scan UPI QR Code to Complete Payment</p>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=acpay@sbi&pn=ACPay%20Services&am=18500" id="qr-image" alt="UPI QR">
-        <div style="margin-top: 8px; font-size: 13px; color: #cbd5e1;">
-          <p><strong>UPI ID:</strong> <code>acpay@sbi</code></p>
-          <p><strong>Bank Account:</strong> 30012345678 (State Bank of India)</p>
-          <p><strong>IFSC:</strong> SBIN0000847</p>
-        </div>
+    <div class="form-group">
+      <label>Password</label>
+      <div class="input-wrapper">
+        <input type="password" id="login-password" placeholder="Enter your password" style="padding-left: 14px;">
       </div>
+    </div>
 
-      <div class="form-group">
-        <label>Enter 12-Digit UTR / Bank Reference Number</label>
-        <input type="text" id="utr-input" placeholder="e.g. 430123456789" maxlength="12">
-        <span style="font-size:11px; color:#94a3b8;">Find the 12-digit reference number in your GPay / PhonePe / Paytm / YONO receipt.</span>
-      </div>
-      <button class="btn-primary" onclick="submitUTR()">Submit 12-Digit UTR for Verification</button>
+    <button type="button" class="btn-submit" onclick="handleLogin()">Sign In</button>
+
+    <div class="links-row">
+      <a onclick="switchView('register')">Create New Account</a>
+      <a onclick="switchView('forgot')">Forgot Password?</a>
     </div>
   </div>
 
-  <!-- PANEL 3: ADMIN LEDGER -->
-  <div id="panel-admin" class="panel">
-    <h3>Admin Dashboard & Transaction Queue</h3>
-    <button style="padding: 6px 12px; background: #334155; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 12px;" onclick="loadAdminData()">Refresh Records</button>
-    
-    <h4 style="margin-top: 10px; color: #e2e8f0;">Submitted Payments Queue</h4>
+  <!-- VIEW 3: FORGOT PASSWORD (POINT 2) -->
+  <div id="view-forgot" class="card view-section">
+    <div class="form-group">
+      <label>Registered Gmail Address</label>
+      <div class="input-wrapper">
+        <span class="input-icon">✉</span>
+        <input type="email" id="forgot-email" placeholder="name@gmail.com">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Verification OTP</label>
+      <div class="otp-wrapper">
+        <input type="text" id="forgot-otp" placeholder="Enter OTP from Gmail" maxlength="6">
+        <button type="button" id="btn-forgot-otp" class="btn-send-otp" onclick="handleSendForgotOTP()">Send OTP</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>New Password</label>
+      <div class="input-wrapper">
+        <input type="password" id="forgot-newpass" placeholder="Create new strong password" style="padding-left: 14px;">
+      </div>
+    </div>
+
+    <button type="button" class="btn-submit" onclick="handleResetPassword()">Update Password</button>
+
+    <div class="links-row">
+      <a onclick="switchView('login')">Back to Sign In</a>
+    </div>
+  </div>
+
+  <!-- VIEW 4: USER DASHBOARD (PROFILE, WALLET POINTS, ADD UPI, BUY PLANS) -->
+  <div id="view-dashboard" class="card view-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="color:#0f172a; font-size:18px;">User Dashboard</h3>
+      <a onclick="handleLogout()" style="color:#dc2626; font-size:13px; font-weight:700; cursor:pointer;">Logout</a>
+    </div>
+
+    <div class="wallet-box">
+      <div>
+        <div style="font-size:11px; color:#94a3b8; text-transform:uppercase;">User Profile</div>
+        <div id="dash-email" style="font-size:13px; font-weight:600;"></div>
+        <div style="font-size:18px; font-weight:700; color:#4ade80; margin-top:4px;" id="dash-points">0 Valid Points</div>
+      </div>
+      <div id="admin-indicator"></div>
+    </div>
+
+    <!-- ADD UPI SECTION -->
+    <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:16px;">
+      <label style="margin-bottom:6px;">Add UPI ID</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="upi-input" placeholder="e.g. username@okhdfcbank" style="padding-left:12px;">
+        <button type="button" class="btn-send-otp" style="padding:0 14px;" onclick="handleSaveUPI()">Save UPI</button>
+      </div>
+      <div id="upi-display" style="font-size:11px; color:#047857; margin-top:6px; font-weight:600;"></div>
+    </div>
+
+    <label style="margin-bottom: 10px;">Select Buy Plan Option</label>
+
+    <div class="plan-item">
+      <div>
+        <strong>Tier 1 Plan</strong>
+        <div style="font-size:12px; color:#64748b;">₹18,500 (18,500 Points)</div>
+      </div>
+      <button class="btn-send-otp" style="padding: 8px 14px;" onclick="selectPlan(18500, 'Tier 1 Plan')">Buy Plan</button>
+    </div>
+
+    <div class="plan-item">
+      <div>
+        <strong>Tier 2 Plan</strong>
+        <div style="font-size:12px; color:#64748b;">₹35,000 (35,000 Points)</div>
+      </div>
+      <button class="btn-send-otp" style="padding: 8px 14px;" onclick="selectPlan(35000, 'Tier 2 Plan')">Buy Plan</button>
+    </div>
+
+    <div class="plan-item">
+      <div>
+        <strong>Tier 3 Plan</strong>
+        <div style="font-size:12px; color:#64748b;">₹50,000 (50,000 Points)</div>
+      </div>
+      <button class="btn-send-otp" style="padding: 8px 14px;" onclick="selectPlan(50000, 'Tier 3 Plan')">Buy Plan</button>
+    </div>
+
+    <div style="text-align:center; margin-top:16px;">
+      <a id="btn-admin-link" style="display:none; color:#0369a1; font-weight:700; font-size:13px; cursor:pointer;" onclick="switchView('admin')">→ Open Admin Panel</a>
+    </div>
+  </div>
+
+  <!-- VIEW 5: PAYMENT SCANNER & 12-DIGIT UTR SUBMISSION (POINT 3) -->
+  <div id="view-payment" class="card view-section">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="color:#0f172a; font-size:18px;">Payment & Deposit</h3>
+      <a onclick="switchView('dashboard')" style="color:#0369a1; font-size:13px; font-weight:700; cursor:pointer;">Cancel</a>
+    </div>
+
+    <p style="font-size:13px; color:#334155; margin-top:8px;">Plan: <strong id="pay-plan-name"></strong> | Amount: <strong id="pay-plan-amount"></strong></p>
+
+    <div class="scanner-box">
+      <img id="qr-display" src="" alt="UPI QR Code">
+      <div style="text-align:left; background:#fff; padding:10px; border-radius:6px; font-size:12px; border:1px solid #cbd5e1; margin-top:8px;">
+        <p><strong>UPI ID:</strong> <code>acpay@sbi</code></p>
+        <p><strong>Bank Account:</strong> 30012345678</p>
+        <p><strong>Bank:</strong> State Bank of India</p>
+        <p><strong>IFSC:</strong> SBIN0000847</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Enter 12-Digit UTR Number</label>
+      <input type="text" id="utr-number" placeholder="e.g. 430123456789" maxlength="12" style="padding-left:14px;">
+    </div>
+
+    <button type="button" class="btn-submit" onclick="handleSubmitUTR()">Submit 12-Digit UTR</button>
+  </div>
+
+  <!-- VIEW 6: ADMIN PANEL (POINT 4) -->
+  <div id="view-admin" class="card view-section" style="max-width: 600px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="color:#0f172a; font-size:18px;">Admin Control Panel</h3>
+      <a onclick="switchView('dashboard')" style="color:#0369a1; font-size:13px; font-weight:700; cursor:pointer;">Back to App</a>
+    </div>
+
+    <label style="margin-top: 14px;">Submitted 12-Digit UTRs</label>
     <div style="overflow-x: auto;">
-      <table id="tx-table">
+      <table id="table-utrs">
         <thead>
           <tr>
-            <th>User Email</th>
+            <th>User</th>
             <th>Amount</th>
-            <th>12-Digit UTR</th>
+            <th>UTR</th>
+            <th>Points to Add</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
@@ -167,13 +410,14 @@
       </table>
     </div>
 
-    <h4 style="margin-top: 25px; color: #e2e8f0;">Registered Users Ledger</h4>
+    <label style="margin-top: 20px;">Registered User Ledger</label>
     <div style="overflow-x: auto;">
-      <table id="users-table">
+      <table id="table-users">
         <thead>
           <tr>
-            <th>User Email</th>
-            <th>Current Balance</th>
+            <th>Email</th>
+            <th>UPI ID</th>
+            <th>Valid Points</th>
             <th>Role</th>
           </tr>
         </thead>
@@ -181,58 +425,88 @@
       </table>
     </div>
   </div>
-</div>
+
+  <div class="footer-note">
+    Protected by ACPay Real Gmail OTP Verification
+  </div>
 
 <script>
   let token = localStorage.getItem('acpay_token');
+  let selectedPlan = { amount: 18500, name: 'Tier 1 Plan' };
 
-  function switchTab(name) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-    document.getElementById(`panel-${name}`).classList.add('active');
-    document.getElementById(`tab-${name}`).classList.add('active');
+  function switchView(viewName) {
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+    document.getElementById(`view-${viewName}`).classList.add('active');
 
-    if (name === 'payment') checkUserSession();
-    if (name === 'admin') loadAdminData();
+    if (viewName === 'dashboard') loadDashboard();
+    if (viewName === 'admin') loadAdminData();
   }
 
-  function toggleAuthSub(view) {
-    document.getElementById('login-sec').style.display = view === 'login' ? 'block' : 'none';
-    document.getElementById('reg-sec').style.display = view === 'register' ? 'block' : 'none';
-    document.getElementById('forgot-sec').style.display = view === 'forgot' ? 'block' : 'none';
-  }
+  // 1. Send OTP for Registration
+  async function handleSendRegisterOTP() {
+    const email = document.getElementById('reg-email').value.trim();
+    const btn = document.getElementById('btn-reg-otp');
+    if (!email) return alert('Please enter your Gmail address first.');
 
-  function updatePlanAmount() {
-    const amt = document.getElementById('plan-select').value;
-    document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=acpay@sbi&pn=ACPay%20Services&am=${amt}`;
-  }
+    btn.disabled = true;
+    btn.innerText = 'Sending...';
 
-  async function checkUserSession() {
-    if (!token) {
-      alert('Please log in first to access payments and balance.');
-      switchTab('auth');
-      return;
-    }
     try {
-      const res = await fetch('/api/user/profile', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
-        document.getElementById('session-info').innerText = `${data.email} (${data.role})`;
-        document.getElementById('user-points').innerText = `${data.points} Points`;
+        alert('OTP sent to your Gmail inbox!');
+        btn.innerText = 'Sent ✓';
       } else {
-        localStorage.removeItem('acpay_token');
-        token = null;
-        switchTab('auth');
+        alert(data.error || 'Failed to dispatch OTP');
+        btn.disabled = false;
+        btn.innerText = 'Send OTP';
       }
-    } catch (e) {
-      console.warn('Session check failed:', e.message);
+    } catch (err) {
+      alert('Network Error: Server is waking up. Please wait 10 seconds and retry.');
+      btn.disabled = false;
+      btn.innerText = 'Send OTP';
     }
   }
 
+  // 2. Register Account
+  async function handleRegister() {
+    const email = document.getElementById('reg-email').value.trim();
+    const referralCode = document.getElementById('reg-referral').value.trim();
+    const otp = document.getElementById('reg-otp').value.trim();
+    const password = document.getElementById('reg-password').value;
+
+    if (!email || !otp || !password) return alert('Please fill in Email, OTP, and Password.');
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, referralCode, otp, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        token = data.token;
+        localStorage.setItem('acpay_token', token);
+        alert('Registration successful!');
+        switchView('dashboard');
+      } else {
+        alert(data.error || 'Registration failed');
+      }
+    } catch (err) {
+      alert('Network Error: Could not connect to server.');
+    }
+  }
+
+  // 3. Login
   async function handleLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
-    if (!email || !password) return alert('Please enter both email and password');
+    if (!email || !password) return alert('Enter email and password');
 
     try {
       const res = await fetch('/api/login', {
@@ -244,65 +518,24 @@
       if (res.ok) {
         token = data.token;
         localStorage.setItem('acpay_token', token);
-        alert('Login successful');
-        switchTab('payment');
+        switchView('dashboard');
       } else {
-        alert(data.error || 'Login failed');
+        alert(data.error || 'Invalid credentials');
       }
-    } catch (e) {
-      alert('Unable to reach server. Please wait 15 seconds and try again.');
+    } catch (err) {
+      alert('Network Error: Could not connect to server.');
     }
   }
 
-  async function sendRegOTP() {
-    const email = document.getElementById('reg-email').value.trim();
-    if (!email) return alert('Enter email first');
-    try {
-      const res = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert('OTP sent successfully to your email');
-      } else {
-        alert(data.error || 'Failed to send OTP');
-      }
-    } catch (e) {
-      alert('Unable to reach server. Please wait 15 seconds and try again.');
-    }
-  }
-
-  async function handleRegister() {
-    const email = document.getElementById('reg-email').value.trim();
-    const otp = document.getElementById('reg-otp').value.trim();
-    const password = document.getElementById('reg-password').value;
-    if (!email || !otp || !password) return alert('Please fill in all fields');
-
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp, password })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        token = data.token;
-        localStorage.setItem('acpay_token', token);
-        alert('Account registered successfully');
-        switchTab('payment');
-      } else {
-        alert(data.error || 'Registration failed');
-      }
-    } catch (e) {
-      alert('Unable to reach server during registration.');
-    }
-  }
-
-  async function sendForgotOTP() {
+  // 4. Forgot Password Flow
+  async function handleSendForgotOTP() {
     const email = document.getElementById('forgot-email').value.trim();
-    if (!email) return alert('Enter your registered email');
+    const btn = document.getElementById('btn-forgot-otp');
+    if (!email) return alert('Enter registered Gmail address');
+
+    btn.disabled = true;
+    btn.innerText = 'Sending...';
+
     try {
       const res = await fetch('/api/forgot-password/send-otp', {
         method: 'POST',
@@ -310,9 +543,18 @@
         body: JSON.stringify({ email })
       });
       const data = await res.json();
-      alert(res.ok ? 'Reset code sent to your email' : (data.error || 'Failed to send reset OTP'));
-    } catch (e) {
-      alert('Unable to reach server sending reset OTP.');
+      if (res.ok) {
+        alert('Reset OTP sent to your email!');
+        btn.innerText = 'Sent ✓';
+      } else {
+        alert(data.error || 'Email not found');
+        btn.disabled = false;
+        btn.innerText = 'Send OTP';
+      }
+    } catch (err) {
+      alert('Network Error: Server is waking up.');
+      btn.disabled = false;
+      btn.innerText = 'Send OTP';
     }
   }
 
@@ -320,7 +562,8 @@
     const email = document.getElementById('forgot-email').value.trim();
     const otp = document.getElementById('forgot-otp').value.trim();
     const newPassword = document.getElementById('forgot-newpass').value;
-    if (!email || !otp || !newPassword) return alert('Please fill in all reset fields');
+
+    if (!email || !otp || !newPassword) return alert('Enter Email, OTP, and New Password.');
 
     try {
       const res = await fetch('/api/forgot-password/reset', {
@@ -331,43 +574,103 @@
       const data = await res.json();
       if (res.ok) {
         alert(data.message);
-        toggleAuthSub('login');
+        switchView('login');
       } else {
-        alert(data.error || 'Reset failed');
+        alert(data.error || 'Password reset failed');
       }
-    } catch (e) {
-      alert('Unable to reach server during password reset.');
+    } catch (err) {
+      alert('Network Error: Could not connect to server.');
     }
   }
 
-  async function submitUTR() {
-    if (!token) return alert('Please login first');
-    const utr = document.getElementById('utr-input').value.trim();
-    const amount = document.getElementById('plan-select').value;
+  // 5. User Dashboard & Balance
+  async function loadDashboard() {
+    if (!token) return switchView('login');
+    try {
+      const res = await fetch('/api/user/profile', { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        handleLogout();
+        return;
+      }
+      const data = await res.json();
+      document.getElementById('dash-email').innerText = data.email;
+      document.getElementById('dash-points').innerText = `${data.points} Valid Points`;
+      if (data.upiId) {
+        document.getElementById('upi-display').innerText = `Active UPI: ${data.upiId}`;
+      } else {
+        document.getElementById('upi-display').innerText = '';
+      }
+
+      const adminLink = document.getElementById('btn-admin-link');
+      if (data.role === 'admin') {
+        adminLink.style.display = 'inline-block';
+        document.getElementById('admin-indicator').innerHTML = '<span style="background:#0284c7; color:#fff; font-size:10px; padding:3px 6px; border-radius:4px; font-weight:700;">ADMIN</span>';
+      } else {
+        adminLink.style.display = 'none';
+        document.getElementById('admin-indicator').innerHTML = '';
+      }
+    } catch (e) {
+      console.warn('Dashboard load error:', e.message);
+    }
+  }
+
+  async function handleSaveUPI() {
+    const upi = document.getElementById('upi-input').value.trim();
+    if (!upi) return alert('Enter a valid UPI ID');
+
+    try {
+      const res = await fetch('/api/user/save-upi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ upiId: upi })
+      });
+      const data = await res.json();
+      alert(res.ok ? 'UPI ID saved successfully!' : data.error);
+      if (res.ok) loadDashboard();
+    } catch (err) {
+      alert('Network Error saving UPI.');
+    }
+  }
+
+  function selectPlan(amount, name) {
+    selectedPlan = { amount, name };
+    document.getElementById('pay-plan-name').innerText = name;
+    document.getElementById('pay-plan-amount').innerText = `₹${amount.toLocaleString('en-IN')}`;
+    document.getElementById('qr-display').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=acpay@sbi&pn=ACPay%20Services&am=${amount}`;
+    document.getElementById('utr-number').value = '';
+    switchView('payment');
+  }
+
+  // 6. Submit 12-Digit UTR
+  async function handleSubmitUTR() {
+    const utr = document.getElementById('utr-number').value.trim();
     if (!/^\d{12}$/.test(utr)) return alert('UTR must be exactly 12 digits');
 
     try {
       const res = await fetch('/api/payment/submit-utr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ utrNumber: utr, amount: amount, planName: 'Selected Tier' })
+        body: JSON.stringify({ planName: selectedPlan.name, amount: selectedPlan.amount, utrNumber: utr })
       });
       const data = await res.json();
       alert(res.ok ? data.message : data.error);
-      if (res.ok) document.getElementById('utr-input').value = '';
-    } catch (e) {
-      alert('Unable to reach server submitting UTR.');
+      if (res.ok) switchView('dashboard');
+    } catch (err) {
+      alert('Network Error submitting UTR.');
     }
   }
 
+  // 7. Admin Functions
   async function loadAdminData() {
-    if (!token) return alert('Log in with admin account to view ledger');
     try {
       const res = await fetch('/api/admin/data', { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) return alert('Access restricted to Admin account');
-
+      if (!res.ok) {
+        alert('Access restricted to Admin only');
+        return switchView('dashboard');
+      }
       const data = await res.json();
-      const txBody = document.querySelector('#tx-table tbody');
+
+      const txBody = document.querySelector('#table-utrs tbody');
       txBody.innerHTML = '';
       data.transactions.forEach(t => {
         const tr = document.createElement('tr');
@@ -375,45 +678,66 @@
           <td>${t.userEmail}</td>
           <td>₹${t.amount}</td>
           <td><code>${t.utrNumber}</code></td>
+          <td>
+            ${t.status === 'PENDING' ? `
+              <input type="number" id="pts-${t.id}" value="${t.amount}" style="width:75px; padding:3px; font-size:11px;">
+            ` : `${t.amount} Points`}
+          </td>
           <td><span class="badge ${t.status}">${t.status}</span></td>
           <td>
             ${t.status === 'PENDING' ? `
-              <button style="padding:4px 8px; background:#16a34a; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="processTx('${t.id}', 'APPROVE')">Approve</button>
-              <button style="padding:4px 8px; background:#dc2626; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="processTx('${t.id}', 'REJECT')">Reject</button>
+              <button style="padding:2px 6px; background:#16a34a; color:#fff; border:none; border-radius:3px; cursor:pointer;" onclick="actionUTR('${t.id}', 'APPROVE')">Approve</button>
+              <button style="padding:2px 6px; background:#dc2626; color:#fff; border:none; border-radius:3px; cursor:pointer;" onclick="actionUTR('${t.id}', 'REJECT')">Reject</button>
             ` : '-'}
           </td>
         `;
         txBody.appendChild(tr);
       });
 
-      const userBody = document.querySelector('#users-table tbody');
+      const userBody = document.querySelector('#table-users tbody');
       userBody.innerHTML = '';
       data.users.forEach(u => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${u.email}</td><td><strong>${u.points} Points</strong></td><td>${u.role}</td>`;
+        tr.innerHTML = `<td>${u.email}</td><td>${u.upiId || 'Not Added'}</td><td><strong>${u.points}</strong></td><td>${u.role}</td>`;
         userBody.appendChild(tr);
       });
     } catch (e) {
-      alert('Failed to fetch admin data: Server unreachable.');
+      alert('Error fetching admin records');
     }
   }
 
-  async function processTx(id, action) {
+  async function actionUTR(transactionId, action) {
+    let customPoints = null;
+    if (action === 'APPROVE') {
+      const inputEl = document.getElementById(`pts-${transactionId}`);
+      if (inputEl) customPoints = Number(inputEl.value);
+    }
+
     try {
       const res = await fetch('/api/admin/action-utr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ transactionId: id, action })
+        body: JSON.stringify({ transactionId, action, points: customPoints })
       });
       const data = await res.json();
       alert(data.message || data.error);
       loadAdminData();
     } catch (e) {
-      alert('Failed to update transaction.');
+      alert('Failed to process UTR');
     }
   }
 
-  if (token) checkUserSession();
+  function handleLogout() {
+    localStorage.removeItem('acpay_token');
+    token = null;
+    switchView('login');
+  }
+
+  // Maintain session on load
+  if (token) {
+    switchView('dashboard');
+  }
 </script>
+
 </body>
 </html>

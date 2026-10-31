@@ -4,18 +4,18 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
 
 const PORT = process.env.PORT || 10000;
 const JWT_SECRET = process.env.JWT_SECRET || 'acpay_jwt_secret_key_98765';
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_API_KEY = process.env.BREVO_API_KEY || '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';
 const DB_FILE = path.join(__dirname, 'database.json');
 
-// --- DATABASE HELPERS ---
+// --- DATABASE FUNCTIONS (POINT 1) ---
 function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
     const initialData = { users: [], transactions: [] };
@@ -24,43 +24,60 @@ function loadDB() {
   }
   try {
     return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-  } catch (err) {
+  } catch (e) {
     return { users: [], transactions: [] };
   }
 }
 
 function saveDB(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error('Database write error:', e.message);
+  }
 }
 
-// In-memory OTP storage for registration and password resets
-const otpCache = {}; // { email: { code, expiresAt, purpose } }
+const otpCache = {};
 
-// --- EMAIL DISPATCH (BREVO HTTP API) ---
-async function sendBrevoEmail(toEmail, subject, textContent) {
-  if (!BREVO_API_KEY) {
-    throw new Error('BREVO_API_KEY is not configured in environment variables');
-  }
-
-  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: {
-      'accept': 'application/json',
-      'api-key': BREVO_API_KEY,
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
+// --- EMAIL DISPATCH (NATIVE HTTPS) ---
+function sendBrevoEmail(toEmail, subject, textContent) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({
       sender: { name: 'ACPay Support', email: 'halthaf261@gmail.com' },
       to: [{ email: toEmail }],
       subject: subject,
-      htmlContent: `<div style="font-family:sans-serif;padding:20px;"><h2>ACPay Notification</h2><p>${textContent}</p></div>`
-    })
-  });
+      htmlContent: `<div style="font-family:Arial,sans-serif;padding:20px;"><h2>ACPay Notification</h2><p>${textContent}</p></div>`
+    });
 
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.message || 'Brevo API call failed');
-  }
+    const options = {
+      hostname: 'api.brevo.com',
+      port: 443,
+      path: '/v3/smtp/email',
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': BREVO_API_KEY.trim(),
+        'content-type': 'application/json',
+        'content-length': Buffer.byteLength(payload)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let rawData = '';
+      res.on('data', chunk => rawData += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(true);
+        } else {
+          reject(new Error(`Brevo Error (${res.statusCode}): ${rawData}`));
+        }
+      });
+    });
+
+    req.on('error', (err) => reject(new Error('Brevo connection failed: ' + err.message)));
+    req.write(payload);
+    req.end();
+  });
 }
 
 // --- AUTHENTICATION MIDDLEWARE ---
@@ -74,16 +91,17 @@ function verifyAuth(req, res, next) {
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Session expired or invalid. Please log in again.' });
+    return res.status(401).json({ error: 'Session expired. Please log in again.' });
   }
 }
 
-// --- ROOT ROUTE: DIRECTLY SERVE PAYMENT.HTML ---
+// Serve index.html on root route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'payment.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
+app.use(express.static(__dirname));
 
-// --- 1. REGISTRATION OTP ---
+// --- 1. SEND OTP FOR REGISTRATION ---
 app.post('/api/send-otp', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required' });
@@ -93,17 +111,15 @@ app.post('/api/send-otp', async (req, res) => {
 
   try {
     await sendBrevoEmail(email, 'ACPay Registration OTP', `Your verification code is: <strong>${otp}</strong>. It expires in 10 minutes.`);
-    console.log(`[ACPay] Register OTP dispatched to ${email}`);
     res.json({ message: 'OTP sent successfully' });
   } catch (err) {
-    console.error('[ACPay] Send OTP Error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: 'Failed to send OTP to email' });
   }
 });
 
-// --- 2. REGISTER USER ---
+// --- 2. REGISTER USER (SAVES TO DATABASE - POINT 1) ---
 app.post('/api/register', (req, res) => {
-  const { email, password, otp } = req.body;
+  const { email, password, otp, referralCode } = req.body;
   const cached = otpCache[email];
 
   if (!cached || cached.code !== otp || cached.purpose !== 'register' || Date.now() > cached.expiresAt) {
@@ -119,7 +135,9 @@ app.post('/api/register', (req, res) => {
     id: 'user_' + Date.now(),
     email,
     password,
-    points: 0,
+    referralCode: referralCode || null,
+    upiId: null,
+    points: referralCode ? 500 : 0,
     role: email === 'halthaf261@gmail.com' ? 'admin' : 'user',
     createdAt: new Date().toISOString()
   };
@@ -146,14 +164,14 @@ app.post('/api/login', (req, res) => {
   res.json({ message: 'Login successful', token, user });
 });
 
-// --- 4. FORGOT PASSWORD: SEND OTP ---
+// --- 4. FORGOT PASSWORD (POINT 2) ---
 app.post('/api/forgot-password/send-otp', async (req, res) => {
   const { email } = req.body;
   const db = loadDB();
   const user = db.users.find(u => u.email === email);
 
   if (!user) {
-    return res.status(404).json({ error: 'No account found with this email' });
+    return res.status(404).json({ error: 'No account registered with this email' });
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -161,14 +179,12 @@ app.post('/api/forgot-password/send-otp', async (req, res) => {
 
   try {
     await sendBrevoEmail(email, 'ACPay Password Reset OTP', `Your password reset code is: <strong>${otp}</strong>. It expires in 10 minutes.`);
-    console.log(`[ACPay] Password Reset OTP sent to ${email}`);
     res.json({ message: 'Password reset OTP sent successfully' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: 'Failed to send reset email' });
   }
 });
 
-// --- 5. FORGOT PASSWORD: VERIFY & UPDATE ---
 app.post('/api/forgot-password/reset', (req, res) => {
   const { email, otp, newPassword } = req.body;
   const cached = otpCache[email];
@@ -178,26 +194,39 @@ app.post('/api/forgot-password/reset', (req, res) => {
   }
 
   const db = loadDB();
-  const userIndex = db.users.findIndex(u => u.email === email);
-  if (userIndex === -1) return res.status(404).json({ error: 'User not found' });
+  const user = db.users.find(u => u.email === email);
+  if (!user) return res.status(404).json({ error: 'User not found' });
 
-  db.users[userIndex].password = newPassword;
+  user.password = newPassword;
   saveDB(db);
   delete otpCache[email];
 
-  res.json({ message: 'Password updated successfully. You can now log in.' });
+  res.json({ message: 'Password updated successfully! You can now log in.' });
 });
 
-// --- 6. USER PROFILE & CURRENT BALANCE ---
+// --- 5. USER PROFILE & SAVE UPI ---
 app.get('/api/user/profile', verifyAuth, (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.id === req.user.id);
   if (!user) return res.status(404).json({ error: 'User not found' });
 
-  res.json({ email: user.email, points: user.points, role: user.role });
+  res.json({ email: user.email, points: user.points, upiId: user.upiId, role: user.role });
 });
 
-// --- 7. SUBMIT PAYMENT WITH 12-DIGIT UTR ---
+app.post('/api/user/save-upi', verifyAuth, (req, res) => {
+  const { upiId } = req.body;
+  if (!upiId) return res.status(400).json({ error: 'UPI ID is required' });
+
+  const db = loadDB();
+  const user = db.users.find(u => u.id === req.user.id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  user.upiId = upiId.trim();
+  saveDB(db);
+  res.json({ message: 'UPI ID updated successfully' });
+});
+
+// --- 6. SUBMIT 12-DIGIT UTR (POINT 3) ---
 app.post('/api/payment/submit-utr', verifyAuth, (req, res) => {
   const { planName, amount, utrNumber } = req.body;
 
@@ -206,8 +235,7 @@ app.post('/api/payment/submit-utr', verifyAuth, (req, res) => {
   }
 
   const db = loadDB();
-  const existingUtr = db.transactions.find(t => t.utrNumber === utrNumber.trim());
-  if (existingUtr) {
+  if (db.transactions.find(t => t.utrNumber === utrNumber.trim())) {
     return res.status(400).json({ error: 'This 12-digit UTR has already been submitted' });
   }
 
@@ -225,10 +253,10 @@ app.post('/api/payment/submit-utr', verifyAuth, (req, res) => {
   db.transactions.unshift(newTx);
   saveDB(db);
 
-  res.json({ message: 'UTR submitted successfully. Pending Admin verification.', transaction: newTx });
+  res.json({ message: 'UTR submitted! Admin will verify and credit your points.', transaction: newTx });
 });
 
-// --- 8. ADMIN: GET ALL USERS & SUBMITTED UTRS ---
+// --- 7. ADMIN CONTROLS (POINT 4) ---
 app.get('/api/admin/data', verifyAuth, (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.id === req.user.id);
@@ -236,15 +264,11 @@ app.get('/api/admin/data', verifyAuth, (req, res) => {
     return res.status(403).json({ error: 'Unauthorized: Admin access required' });
   }
 
-  res.json({
-    users: db.users.map(u => ({ id: u.id, email: u.email, points: u.points, role: u.role, createdAt: u.createdAt })),
-    transactions: db.transactions
-  });
+  res.json({ users: db.users, transactions: db.transactions });
 });
 
-// --- 9. ADMIN: APPROVE OR REJECT UTR & CREDIT POINTS ---
 app.post('/api/admin/action-utr', verifyAuth, (req, res) => {
-  const { transactionId, action } = req.body;
+  const { transactionId, action, points } = req.body;
   const db = loadDB();
 
   const user = db.users.find(u => u.id === req.user.id);
@@ -253,14 +277,14 @@ app.post('/api/admin/action-utr', verifyAuth, (req, res) => {
   }
 
   const tx = db.transactions.find(t => t.id === transactionId);
-  if (!tx) return res.status(404).json({ error: 'Transaction not found' });
-  if (tx.status !== 'PENDING') return res.status(400).json({ error: 'Transaction is already processed' });
+  if (!tx || tx.status !== 'PENDING') return res.status(400).json({ error: 'Transaction is already processed' });
 
   if (action === 'APPROVE') {
     tx.status = 'APPROVED';
     const targetUser = db.users.find(u => u.id === tx.userId);
     if (targetUser) {
-      targetUser.points = (targetUser.points || 0) + tx.amount;
+      const addedPoints = (points !== null && !isNaN(points)) ? Number(points) : tx.amount;
+      targetUser.points = (targetUser.points || 0) + addedPoints;
     }
   } else {
     tx.status = 'REJECTED';
@@ -270,9 +294,8 @@ app.post('/api/admin/action-utr', verifyAuth, (req, res) => {
   res.json({ message: `Transaction has been ${action.toLowerCase()}d successfully` });
 });
 
-// --- FALLBACK ROUTE: CATCH-ALL TO SERVE HTML ---
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'payment.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
