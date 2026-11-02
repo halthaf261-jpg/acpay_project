@@ -97,11 +97,26 @@ function writeScanners(data) {
   }
 }
 
+// PRODUCTION-READY SSL TRANSPORTER CONFIGURATION (PORT 465)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: {
     user: (process.env.GMAIL_USER || '').trim(),
     pass: (process.env.GMAIL_APP_PASS || '').trim()
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
+});
+
+// VERIFY SMTP CONNECTION AT SERVER STARTUP
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('❌ SMTP Connection Error:', error.message);
+  } else {
+    console.log('✅ SMTP Server is ready to send verification emails.');
   }
 });
 
@@ -186,6 +201,7 @@ app.post('/api/auth/register-send-otp', async (req, res) => {
     await sendOtpEmail(cleanEmail, otp, 'Account Registration');
     res.json({ success: true, message: 'Registration OTP sent to your Gmail!' });
   } catch (err) {
+    console.error('Registration email sending failure:', err);
     res.status(500).json({ error: 'Failed to send email.' });
   }
 });
@@ -250,6 +266,7 @@ app.post('/api/auth/login-send-otp', async (req, res) => {
     await sendOtpEmail(cleanEmail, otp, 'Sign-In Security Verification');
     res.json({ success: true, message: 'Sign-in OTP sent to your Gmail inbox!' });
   } catch (err) {
+    console.error('Login email sending failure:', err);
     res.status(500).json({ error: 'Failed to send OTP.' });
   }
 });
@@ -292,6 +309,7 @@ app.post('/api/auth/forgot-send-otp', async (req, res) => {
     await sendOtpEmail(cleanEmail, otp, 'Password Reset Request');
     res.json({ success: true, message: 'Password reset OTP sent to your Gmail!' });
   } catch (err) {
+    console.error('Forgot password email sending failure:', err);
     res.status(500).json({ error: 'Failed to send OTP.' });
   }
 });
@@ -670,7 +688,7 @@ app.get('/api/admin/all-user-ledgers', (req, res) => {
       balance: user.balance,
       deposit1Year: dep1Y,
       withdraw1Year: wth1Y,
-      activePlansCount: (user.activePlans || []).length
+      activePlansCount: (user.activePlans || [])[0] ? 1 : 0
     };
   });
 
