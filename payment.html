@@ -2,372 +2,313 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ACPay - Secure Trading Terminal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACPay - Deposit Gateway</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #0f172a; color: #f8fafc; display: flex; justify-content: center; padding: 25px 15px; }
-    .container { width: 100%; max-width: 680px; background: #1e293b; border-radius: 14px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    h1, h2, h3 { color: #38bdf8; margin-bottom: 12px; }
-    .nav { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 12px; flex-wrap: wrap; }
-    .nav button { background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    .nav button.active { background: #0284c7; color: #fff; border-color: #0284c7; }
-    .panel { display: none; }
-    .panel.active { display: block; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 6px; font-size: 13px; color: #cbd5e1; }
-    input, select { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 14px; }
-    button.btn-primary { width: 100%; padding: 12px; background: #0284c7; border: none; border-radius: 6px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; }
-    button.btn-primary:hover { background: #0369a1; }
-    .card { background: #0f172a; border: 1px solid #334155; padding: 18px; border-radius: 8px; margin-bottom: 15px; }
-    .scanner-box { text-align: center; margin: 15px 0; }
-    .scanner-box img { max-width: 220px; border-radius: 8px; border: 2px solid #38bdf8; background: #fff; padding: 8px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-    th, td { border: 1px solid #334155; padding: 8px 10px; text-align: left; }
-    th { background: #0f172a; color: #38bdf8; }
-    .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-    .badge.PENDING { background: #ca8a04; color: #000; }
-    .badge.APPROVED { background: #16a34a; color: #fff; }
-    .badge.REJECTED { background: #dc2626; color: #fff; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #111827; color: #f8fafc; }
+    .scanner-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; transition: all 0.25s ease; }
+    .scanner-card:hover { border-color: #059669; transform: translateY(-2px); }
+    .scanner-card-active { border: 2px solid #10b981 !important; box-shadow: 0 0 20px rgba(16, 185, 129, 0.25); }
+    .toggle-capsule { background-color: #0f172a; border: 1px solid #1e293b; border-radius: 14px; padding: 4px; display: inline-flex; align-items: center; gap: 4px; }
+    .toggle-btn-active { background-color: #059669; color: #ffffff !important; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4); }
+    .toggle-btn-inactive { background-color: transparent; color: #94a3b8; }
+    .toggle-btn-inactive:hover { color: #ffffff; }
+    .upi-badge { background-color: #064e3b; color: #6ee7b7; border: 1px solid #047857; }
+    .upi-badge:hover { background-color: #047857; color: #ffffff; }
   </style>
 </head>
-<body>
+<body class="min-h-screen p-4 md:p-8 flex flex-col justify-between">
 
-<div class="container">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-    <h2>ACPay Terminal</h2>
-    <div id="session-info" style="font-size: 13px; color: #38bdf8;"></div>
-  </div>
-
-  <div class="nav">
-    <button id="tab-auth" class="active" onclick="switchTab('auth')">Login / Register</button>
-    <button id="tab-payment" onclick="switchTab('payment')">Deposit & UTR</button>
-    <button id="tab-admin" onclick="switchTab('admin')">Admin Ledger</button>
-  </div>
-
-  <!-- PANEL 1: AUTHENTICATION & FORGOT PASSWORD -->
-  <div id="panel-auth" class="panel active">
-    <!-- Login Section -->
-    <div id="login-sec">
-      <h3>Sign In to Your Account</h3>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="login-email" placeholder="name@example.com">
+  <main class="max-w-6xl mx-auto w-full space-y-6">
+    <!-- Top Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+      <div>
+        <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-2">
+          <span class="text-emerald-400">⚡</span> Deposit Gateway
+        </h1>
+        <p class="text-xs text-slate-400 font-semibold mt-1">Select payment route, complete transfer, and upload your payment slip with the 12-digit UTR.</p>
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="login-password" placeholder="••••••••">
+
+      <div class="flex items-center gap-4">
+        <div class="bg-slate-950 border border-slate-800 px-4 py-2 rounded-xl text-right">
+          <span class="text-[10px] text-slate-400 uppercase font-black tracking-wider block">PLAN AMOUNT</span>
+          <span id="displayAmount" class="text-lg font-black text-emerald-400 font-mono">₹18,500</span>
+        </div>
+        <button onclick="window.location.href='/'" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-xs font-bold transition">Back to App</button>
       </div>
-      <button class="btn-primary" onclick="handleLogin()">Login</button>
-      <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:13px;">
-        <a href="#" style="color:#38bdf8;" onclick="toggleAuthSub('register')">Create an Account</a>
-        <a href="#" style="color:#94a3b8;" onclick="toggleAuthSub('forgot')">Forgot Password?</a>
+    </header>
+
+    <!-- UPI / BANK TOGGLE BAR -->
+    <div class="flex items-center justify-start">
+      <div class="toggle-capsule shadow-lg">
+        <button id="btnToggleUpi" onclick="switchMethod('upi')" class="toggle-btn-active px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition">
+          <i class="fa-solid fa-bolt text-sm"></i><span>UPI</span>
+        </button>
+        <button id="btnToggleBank" onclick="switchMethod('bank')" class="toggle-btn-inactive px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition">
+          <i class="fa-solid fa-building-columns text-sm"></i><span>BANK</span>
+        </button>
       </div>
     </div>
 
-    <!-- Registration Section -->
-    <div id="reg-sec" style="display:none;">
-      <h3>Create New Account</h3>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="reg-email" placeholder="name@example.com">
-      </div>
-      <button type="button" style="padding: 6px 12px; background: #334155; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 12px;" onclick="sendRegOTP()">Send OTP</button>
-      <div class="form-group">
-        <label>6-Digit OTP</label>
-        <input type="text" id="reg-otp" placeholder="123456" maxlength="6">
-      </div>
-      <div class="form-group">
-        <label>Set Password</label>
-        <input type="password" id="reg-password" placeholder="••••••••">
-      </div>
-      <button class="btn-primary" onclick="handleRegister()">Complete Registration</button>
-      <div style="margin-top:12px; font-size:13px;">
-        <a href="#" style="color:#38bdf8;" onclick="toggleAuthSub('login')">Already have an account? Log in</a>
-      </div>
-    </div>
+    <!-- DYNAMIC SCANNER CARDS GRID (SHOWS GALLERY QR CODES) -->
+    <div id="viewUpiCards" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
 
-    <!-- Forgot Password Section -->
-    <div id="forgot-sec" style="display:none;">
-      <h3>Reset Your Password</h3>
-      <div class="form-group">
-        <label>Registered Email</label>
-        <input type="email" id="forgot-email" placeholder="name@example.com">
-      </div>
-      <button type="button" style="padding: 6px 12px; background: #334155; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 12px;" onclick="sendForgotOTP()">Send Reset OTP</button>
-      <div class="form-group">
-        <label>Enter 6-Digit OTP</label>
-        <input type="text" id="forgot-otp" placeholder="123456" maxlength="6">
-      </div>
-      <div class="form-group">
-        <label>New Password</label>
-        <input type="password" id="forgot-newpass" placeholder="••••••••">
-      </div>
-      <button class="btn-primary" onclick="handleResetPassword()">Update Password</button>
-      <div style="margin-top:12px; font-size:13px;">
-        <a href="#" style="color:#38bdf8;" onclick="toggleAuthSub('login')">Back to Login</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- PANEL 2: PAYMENT & 12-DIGIT UTR SUBMISSION -->
-  <div id="panel-payment" class="panel">
-    <h3>Deposit & Upgrade Tier</h3>
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-        <span>Your Balance / Points:</span>
-        <strong id="user-points" style="color: #4ade80;">0 Points</strong>
-      </div>
-      <div class="form-group">
-        <label>Select Plan Tier</label>
-        <select id="plan-select" onchange="updatePlanAmount()">
-          <option value="18500">Tier 1 Plan - ₹18,500 (18,500 Points)</option>
-          <option value="35000">Tier 2 Plan - ₹35,000 (35,000 Points)</option>
-          <option value="50000">Tier 3 Plan - ₹50,000 (50,000 Points)</option>
-        </select>
+    <!-- BANK VIEW -->
+    <div id="viewBankCard" class="hidden bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-950 border border-emerald-800/60 flex items-center justify-center text-emerald-400 text-2xl"><i class="fa-solid fa-building-columns"></i></div>
+          <div><h3 class="text-base font-extrabold text-white">Company Bank Account Settlement</h3><p class="text-xs text-slate-400">Transfer via IMPS / NEFT / RTGS / Net Banking directly</p></div>
+        </div>
+        <span id="dispBankBadge" class="text-xs font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/60 px-3 py-1 rounded-lg">State Bank of India</span>
       </div>
 
-      <div class="scanner-box">
-        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">Scan UPI QR Code to Complete Payment</p>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=acpay@sbi&pn=ACPay%20Services&am=18500" id="qr-image" alt="UPI QR">
-        <div style="margin-top: 8px; font-size: 13px; color: #cbd5e1;">
-          <p><strong>UPI ID:</strong> <code>acpay@sbi</code></p>
-          <p><strong>Bank Account:</strong> 30012345678 (State Bank of India)</p>
-          <p><strong>IFSC:</strong> SBIN0000847</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+          <div><span class="text-[10px] text-slate-500 font-bold uppercase block">Account Holder Name</span><span id="dispBankHolder" class="text-sm font-bold text-white">Althaf Hussain</span></div>
+          <button onclick="copyText('dispBankHolder')" class="text-slate-400 hover:text-emerald-400 text-sm p-1.5"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+          <div><span class="text-[10px] text-slate-500 font-bold uppercase block">Bank Name</span><span id="dispBankName" class="text-sm font-bold text-white">State Bank of India</span></div>
+          <button onclick="copyText('dispBankName')" class="text-slate-400 hover:text-emerald-400 text-sm p-1.5"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+          <div><span class="text-[10px] text-slate-500 font-bold uppercase block">Bank Account Number</span><span id="dispBankAcc" class="text-base font-black font-mono text-emerald-400">42971394203</span></div>
+          <button onclick="copyText('dispBankAcc')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow"><i class="fa-regular fa-copy"></i> Copy</button>
+        </div>
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+          <div><span class="text-[10px] text-slate-500 font-bold uppercase block">IFSC Code</span><span id="dispBankIfsc" class="text-base font-black font-mono text-indigo-400">SBIN0000977</span></div>
+          <button onclick="copyText('dispBankIfsc')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow"><i class="fa-regular fa-copy"></i> Copy</button>
         </div>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label>Enter 12-Digit UTR / Bank Reference Number</label>
-        <input type="text" id="utr-input" placeholder="e.g. 430123456789" maxlength="12">
-        <span style="font-size:11px; color:#94a3b8;">Find the 12-digit reference number in your GPay / PhonePe / Paytm / YONO receipt.</span>
+    <!-- 12-DIGIT UTR & PAYMENT SCREENSHOT FORM -->
+    <div id="utrSubmissionSection" class="bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl space-y-5">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-sm font-bold text-white">Submit Payment Details & Screenshot Slip</h2>
+          <p class="text-xs text-slate-400">Provide both the 12-digit UTR reference number and your receipt screenshot.</p>
+        </div>
+        <span id="selectedRouteBadge" class="text-xs font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/60 px-3 py-1 rounded-lg">Active Route: Direct Transfer</span>
       </div>
-      <button class="btn-primary" onclick="submitUTR()">Submit 12-Digit UTR for Verification</button>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">12-Digit UTR / Transaction ID</label>
+          <input type="text" id="inputUtr" maxlength="12" placeholder="e.g. 429188291048" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-center font-mono text-base font-bold tracking-widest text-white focus:border-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">Payment Screenshot / Receipt Slip (Image)</label>
+          <div class="flex items-center gap-4">
+            <input type="file" id="inputScreenshot" accept="image/*" onchange="previewScreenshotFile()" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer">
+          </div>
+          
+          <div id="screenshotPreviewContainer" class="hidden mt-3 p-3 bg-slate-950 border border-slate-800 rounded-xl text-center">
+            <span class="text-[10px] text-slate-400 font-bold block mb-1.5">Selected Receipt Preview:</span>
+            <img id="screenshotPreviewImg" src="" alt="Slip Preview" class="max-h-48 mx-auto rounded-lg object-contain border border-slate-700 shadow-md">
+          </div>
+        </div>
+
+        <button onclick="submitUtrSlip()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Submit UTR Slip & Screenshot for Verification</span>
+        </button>
+
+        <p class="text-[11px] text-center text-slate-500">Your deposit will be confirmed once the Admin checks the screenshot against banking records.</p>
+      </div>
     </div>
-  </div>
+  </main>
 
-  <!-- PANEL 3: ADMIN LEDGER -->
-  <div id="panel-admin" class="panel">
-    <h3>Admin Dashboard & Transaction Queue</h3>
-    <button style="padding: 6px 12px; background: #334155; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 12px;" onclick="loadAdminData()">Refresh Records</button>
-    
-    <h4 style="margin-top: 10px; color: #e2e8f0;">Submitted Payments Queue</h4>
-    <div style="overflow-x: auto;">
-      <table id="tx-table">
-        <thead>
-          <tr>
-            <th>User Email</th>
-            <th>Amount</th>
-            <th>12-Digit UTR</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  <script>
+    let activeMethod = 'upi';
+    let availableScanners = [];
+    let activeScannerIndex = 0;
+    let base64Screenshot = "";
 
-    <h4 style="margin-top: 25px; color: #e2e8f0;">Registered Users Ledger</h4>
-    <div style="overflow-x: auto;">
-      <table id="users-table">
-        <thead>
-          <tr>
-            <th>User Email</th>
-            <th>Current Balance</th>
-            <th>Role</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-</div>
+    const params = new URLSearchParams(window.location.search);
+    const planAmount = params.get('amount') || '18500';
+    const planId = params.get('pkg') || 'PKG-18K';
+    const userEmail = params.get('email') || localStorage.getItem('acpay_user_email') || 'halthaf261@gmail.com';
 
-<script>
-  let token = localStorage.getItem('acpay_token');
+    document.getElementById('displayAmount').innerText = `₹${parseFloat(planAmount).toLocaleString()}`;
 
-  function switchTab(name) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-    document.getElementById(`panel-${name}`).classList.add('active');
-    document.getElementById(`tab-${name}`).classList.add('active');
+    function switchMethod(method) {
+      activeMethod = method;
+      const btnUpi = document.getElementById('btnToggleUpi');
+      const btnBank = document.getElementById('btnToggleBank');
+      const viewUpi = document.getElementById('viewUpiCards');
+      const viewBank = document.getElementById('viewBankCard');
 
-    if (name === 'payment') checkUserSession();
-    if (name === 'admin') loadAdminData();
-  }
-
-  function toggleAuthSub(view) {
-    document.getElementById('login-sec').style.display = view === 'login' ? 'block' : 'none';
-    document.getElementById('reg-sec').style.display = view === 'register' ? 'block' : 'none';
-    document.getElementById('forgot-sec').style.display = view === 'forgot' ? 'block' : 'none';
-  }
-
-  function updatePlanAmount() {
-    const amt = document.getElementById('plan-select').value;
-    document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=acpay@sbi&pn=ACPay%20Services&am=${amt}`;
-  }
-
-  async function checkUserSession() {
-    if (!token) {
-      alert('Please log in first to access payments and balance.');
-      switchTab('auth');
-      return;
+      if (method === 'upi') {
+        btnUpi.className = 'toggle-btn-active px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition';
+        btnBank.className = 'toggle-btn-inactive px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition';
+        viewUpi.classList.remove('hidden');
+        viewBank.classList.add('hidden');
+        selectScanner(activeScannerIndex);
+      } else {
+        btnBank.className = 'toggle-btn-active px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition';
+        btnUpi.className = 'toggle-btn-inactive px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition';
+        viewUpi.classList.add('hidden');
+        viewBank.classList.remove('hidden');
+        document.getElementById('selectedRouteBadge').innerText = 'Active Route: Bank Transfer';
+      }
     }
-    const res = await fetch('/api/user/profile', { headers: { Authorization: `Bearer ${token}` } });
-    if (res.ok) {
+
+    async function loadScanners() {
+      try {
+        const res = await fetch('/api/scanners/config');
+        const data = await res.json();
+        if (data.success && data.config) {
+          availableScanners = data.config.scanners || [];
+
+          const container = document.getElementById('viewUpiCards');
+          if (availableScanners.length === 0) {
+            container.innerHTML = `<div class="col-span-full p-8 text-center text-slate-400">No active UPI routes currently available. Please select Bank Transfer.</div>`;
+          } else {
+            container.innerHTML = availableScanners.map((sc, idx) => {
+              const upiUri = `upi://pay?pa=${encodeURIComponent(sc.upiVpa || '')}&pn=${encodeURIComponent(sc.accountName || '')}&am=${planAmount}&cu=INR`;
+              
+              // Use uploaded gallery image if available, else generated QR code
+              const qrSrc = sc.customQrImage 
+                ? sc.customQrImage 
+                : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
+
+              return `
+                <div id="card_scan_${idx}" onclick="selectScanner(${idx}, true)" class="scanner-card ${idx === 0 ? 'scanner-card-active' : ''} p-5 flex flex-col justify-between cursor-pointer">
+                  <div>
+                    <div class="flex justify-between items-start">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 text-lg shadow-inner">
+                          <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div>
+                          <h3 class="font-bold text-sm text-white leading-tight truncate max-w-[150px]">${sc.accountName || sc.upiVpa || 'Merchant Route'}</h3>
+                          <span class="text-[10px] text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-800 inline-block mt-0.5 truncate max-w-[150px]">${sc.upiVpa || 'Direct UPI'}</span>
+                        </div>
+                      </div>
+                      <button class="text-slate-400 hover:text-white text-xs"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+
+                    <div class="flex justify-center my-4">
+                      <button onclick="copyUpiDirect('${sc.upiVpa}', event)" class="upi-badge text-[11px] font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                        <span>${sc.accountName || 'UPI'}:</span>
+                        <i class="fa-regular fa-copy"></i>
+                        <span class="font-mono">${sc.upiVpa}</span>
+                      </button>
+                    </div>
+
+                    <div class="bg-white p-3 rounded-xl max-w-[190px] mx-auto shadow-md border-2 border-white mb-2">
+                      <img src="${qrSrc}" alt="Merchant QR" class="w-full h-auto object-contain rounded-lg">
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+            
+            selectScanner(0);
+          }
+
+          if (data.config.companyBank) {
+            const bk = data.config.companyBank;
+            document.getElementById('dispBankName').innerText = bk.bankName || 'State Bank of India';
+            document.getElementById('dispBankBadge').innerText = bk.bankName || 'State Bank of India';
+            document.getElementById('dispBankHolder').innerText = bk.accountHolder || 'Althaf Hussain';
+            document.getElementById('dispBankAcc').innerText = bk.accountNumber || '42971394203';
+            document.getElementById('dispBankIfsc').innerText = bk.ifsc || 'SBIN0000977';
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load dynamic scanners on payment gateway:', e);
+      }
+    }
+
+    function selectScanner(index, shouldScroll = false) {
+      activeScannerIndex = index;
+      availableScanners.forEach((_, idx) => {
+        const el = document.getElementById(`card_scan_${idx}`);
+        if (el) el.classList.remove('scanner-card-active');
+      });
+
+      const activeEl = document.getElementById(`card_scan_${index}`);
+      if (activeEl) activeEl.classList.add('scanner-card-active');
+
+      if (availableScanners[index]) {
+        document.getElementById('selectedRouteBadge').innerText = `Active Route: ${availableScanners[index].upiVpa || availableScanners[index].accountName}`;
+      }
+
+      if (shouldScroll) {
+        document.getElementById('utrSubmissionSection').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('inputUtr').focus();
+      }
+    }
+
+    function copyText(elementId, event) {
+      if (event) event.stopPropagation();
+      const text = document.getElementById(elementId).innerText.trim();
+      navigator.clipboard.writeText(text);
+      alert(`Copied: ${text}`);
+    }
+
+    function copyUpiDirect(vpa, event) {
+      if (event) event.stopPropagation();
+      navigator.clipboard.writeText(vpa);
+      alert(`Copied UPI address: ${vpa}`);
+    }
+
+    function previewScreenshotFile() {
+      const fileInput = document.getElementById('inputScreenshot');
+      const previewContainer = document.getElementById('screenshotPreviewContainer');
+      const previewImg = document.getElementById('screenshotPreviewImg');
+
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          base64Screenshot = e.target.result;
+          previewImg.src = base64Screenshot;
+          previewContainer.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function submitUtrSlip() {
+      const utr = document.getElementById('inputUtr').value.trim();
+      if (!utr || utr.length < 8) return alert('Please enter a valid 12-digit UTR reference number');
+      if (!base64Screenshot) return alert('Please upload your payment screenshot receipt slip.');
+
+      let routeName = 'Direct Bank Transfer';
+      if (activeMethod === 'upi' && availableScanners[activeScannerIndex]) {
+        routeName = `UPI (${availableScanners[activeScannerIndex].upiVpa} - ${availableScanners[activeScannerIndex].accountName})`;
+      }
+
+      const res = await fetch('/api/user/submit-utr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail,
+          amount: parseFloat(planAmount),
+          packageId: planId,
+          utr: utr,
+          screenshot: base64Screenshot,
+          selectedScanner: routeName
+        })
+      });
       const data = await res.json();
-      document.getElementById('session-info').innerText = `${data.email} (${data.role})`;
-      document.getElementById('user-points').innerText = `${data.points} Points`;
-    } else {
-      localStorage.removeItem('acpay_token');
-      token = null;
-      switchTab('auth');
+      if (data.success) {
+        alert(data.message);
+        window.location.href = '/';
+      } else alert(data.error);
     }
-  }
 
-  async function handleLogin() {
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      token = data.token;
-      localStorage.setItem('acpay_token', token);
-      alert('Login successful');
-      switchTab('payment');
-    } else {
-      alert(data.error);
-    }
-  }
-
-  async function sendRegOTP() {
-    const email = document.getElementById('reg-email').value;
-    if (!email) return alert('Enter email first');
-    const res = await fetch('/api/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    const data = await res.json();
-    alert(res.ok ? 'OTP sent to your email' : data.error);
-  }
-
-  async function handleRegister() {
-    const email = document.getElementById('reg-email').value;
-    const otp = document.getElementById('reg-otp').value;
-    const password = document.getElementById('reg-password').value;
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, otp, password })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      token = data.token;
-      localStorage.setItem('acpay_token', token);
-      alert('Account registered successfully');
-      switchTab('payment');
-    } else {
-      alert(data.error);
-    }
-  }
-
-  async function sendForgotOTP() {
-    const email = document.getElementById('forgot-email').value;
-    if (!email) return alert('Enter your registered email');
-    const res = await fetch('/api/forgot-password/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    const data = await res.json();
-    alert(res.ok ? 'Reset code sent to your email' : data.error);
-  }
-
-  async function handleResetPassword() {
-    const email = document.getElementById('forgot-email').value;
-    const otp = document.getElementById('forgot-otp').value;
-    const newPassword = document.getElementById('forgot-newpass').value;
-    const res = await fetch('/api/forgot-password/reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, otp, newPassword })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      alert(data.message);
-      toggleAuthSub('login');
-    } else {
-      alert(data.error);
-    }
-  }
-
-  async function submitUTR() {
-    if (!token) return alert('Please login first');
-    const utr = document.getElementById('utr-input').value.trim();
-    const amount = document.getElementById('plan-select').value;
-    if (!/^\d{12}$/.test(utr)) return alert('UTR must be exactly 12 digits');
-
-    const res = await fetch('/api/payment/submit-utr', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ utrNumber: utr, amount: amount, planName: 'Selected Tier' })
-    });
-    const data = await res.json();
-    alert(res.ok ? data.message : data.error);
-    if (res.ok) document.getElementById('utr-input').value = '';
-  }
-
-  async function loadAdminData() {
-    if (!token) return alert('Log in with admin account to view ledger');
-    const res = await fetch('/api/admin/data', { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) return alert('Access restricted to Admin account');
-
-    const data = await res.json();
-    const txBody = document.querySelector('#tx-table tbody');
-    txBody.innerHTML = '';
-    data.transactions.forEach(t => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${t.userEmail}</td>
-        <td>₹${t.amount}</td>
-        <td><code>${t.utrNumber}</code></td>
-        <td><span class="badge ${t.status}">${t.status}</span></td>
-        <td>
-          ${t.status === 'PENDING' ? `
-            <button style="padding:4px 8px; background:#16a34a; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="processTx('${t.id}', 'APPROVE')">Approve</button>
-            <button style="padding:4px 8px; background:#dc2626; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="processTx('${t.id}', 'REJECT')">Reject</button>
-          ` : '-'}
-        </td>
-      `;
-      txBody.appendChild(tr);
-    });
-
-    const userBody = document.querySelector('#users-table tbody');
-    userBody.innerHTML = '';
-    data.users.forEach(u => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${u.email}</td><td><strong>${u.points} Points</strong></td><td>${u.role}</td>`;
-      userBody.appendChild(tr);
-    });
-  }
-
-  async function processTx(id, action) {
-    const res = await fetch('/api/admin/action-utr', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ transactionId: id, action })
-    });
-    const data = await res.json();
-    alert(data.message || data.error);
-    loadAdminData();
-  }
-
-  if (token) checkUserSession();
-</script>
+    loadScanners();
+  </script>
 </body>
 </html>

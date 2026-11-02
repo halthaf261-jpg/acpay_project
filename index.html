@@ -2,742 +2,983 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ACPay - Official Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACPay - Commercial Finance & Capital Settlement</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    body {
-      background: #737b84;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px 15px;
-    }
-    .card {
-      background: #e2e8f0;
-      width: 100%;
-      max-width: 440px;
-      border-radius: 12px;
-      padding: 30px 24px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    }
-    .form-group {
-      margin-bottom: 18px;
-    }
-    label {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      color: #64748b;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-    .input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      color: #94a3b8;
-      font-size: 15px;
-    }
-    input {
-      width: 100%;
-      padding: 12px 14px 12px 40px;
-      background: #cbd5e1;
-      border: 1px solid #94a3b8;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #1e293b;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    input:focus {
-      border-color: #0d9488;
-      background: #d8e2ec;
-    }
-    .referral-group input {
-      border: 1.5px solid #d97706;
-      background: #e2e8f0;
-    }
-    .referral-group .input-icon {
-      color: #d97706;
-    }
-    .otp-wrapper {
-      display: flex;
-      gap: 8px;
-    }
-    .otp-wrapper input {
-      padding-left: 14px;
-      border: 1.5px solid #6366f1;
-      background: #e2e8f0;
-    }
-    .btn-send-otp {
-      padding: 0 18px;
-      background: #4f46e5;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s;
-    }
-    .btn-send-otp:hover {
-      background: #4338ca;
-    }
-    .btn-send-otp:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
-    .btn-submit {
-      width: 100%;
-      padding: 14px;
-      background: #064e3b;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.2s;
-    }
-    .btn-submit:hover {
-      background: #04382a;
-    }
-    .footer-note {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 11px;
-      color: #475569;
-    }
-    .links-row {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 14px;
-      font-size: 13px;
-    }
-    .links-row a {
-      color: #0369a1;
-      text-decoration: none;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .links-row a:hover {
-      text-decoration: underline;
-    }
-    .view-section {
-      display: none;
-    }
-    .view-section.active {
-      display: block;
-    }
-    /* Dashboard & Wallet UI */
-    .wallet-box {
-      background: #1e293b;
-      color: #f8fafc;
-      padding: 18px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .plan-item {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .scanner-box {
-      text-align: center;
-      margin: 15px 0;
-    }
-    .scanner-box img {
-      max-width: 200px;
-      border: 2px solid #0284c7;
-      border-radius: 8px;
-      background: #fff;
-      padding: 6px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      font-size: 12px;
-    }
-    th, td {
-      border: 1px solid #cbd5e1;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background: #334155;
-      color: #fff;
-    }
-    .badge {
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-      font-size: 10px;
-    }
-    .badge.PENDING { background: #eab308; color: #000; }
-    .badge.APPROVED { background: #16a34a; color: #fff; }
-    .badge.REJECTED { background: #dc2626; color: #fff; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f7f9fd; color: #1e293b; }
+    .pollpe-card { background: #ffffff; border: 1px solid #eef2f7; box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03); border-radius: 28px; }
+    .pollpe-card-hover { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .pollpe-card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 35px -8px rgba(124, 58, 237, 0.12); border-color: #c4b5fd; }
+    .btn-pollpe-purple { background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%); color: #ffffff; box-shadow: 0 6px 18px -3px rgba(124, 58, 237, 0.35); transition: all 0.2s ease; }
+    .btn-pollpe-purple:hover { background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%); transform: translateY(-1px); }
+    .btn-pollpe-emerald { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; box-shadow: 0 6px 18px -3px rgba(16, 185, 129, 0.3); }
+    .tab-pill-active { background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%) !important; color: #ffffff !important; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3); }
+    .bg-sparkle { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0; background: radial-gradient(circle at 10% 15%, rgba(167, 139, 250, 0.12) 0%, transparent 40%), radial-gradient(circle at 90% 20%, rgba(251, 191, 36, 0.08) 0%, transparent 35%); }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between p-3 md:p-6 relative">
 
-  <!-- VIEW 1: REGISTRATION (ORIGINAL DESIGN) -->
-  <div id="view-register" class="card view-section active">
-    <div class="form-group">
-      <label>Gmail Address</label>
-      <div class="input-wrapper">
-        <span class="input-icon">✉</span>
-        <input type="email" id="reg-email" placeholder="name@gmail.com" required>
+  <div class="bg-sparkle"></div>
+
+  <!-- AUTH SCREEN -->
+  <div id="authScreen" class="w-full max-w-4xl mx-auto my-auto pollpe-card p-6 md:p-10 relative z-10 flex flex-col md:flex-row items-center gap-8 shadow-xl border border-slate-100">
+    <div class="w-full md:w-1/2 space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-lg">🪙</div>
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-800 tracking-tight flex items-center gap-1.5">ACPay Terminal <span class="text-xs bg-purple-100 text-purple-700 font-extrabold px-2.5 py-0.5 rounded-full">LIVE</span></h2>
+          <p class="text-xs text-slate-400 font-semibold">Institutional Yield & Quick Settlement</p>
+        </div>
+      </div>
+
+      <!-- Mode Selector Pills -->
+      <div class="flex bg-slate-100 p-1.5 rounded-2xl text-xs font-bold text-slate-600">
+        <button id="tabLogin" onclick="switchAuthMode('login')" class="flex-1 py-2.5 rounded-xl tab-pill-active transition">Sign In</button>
+        <button id="tabRegister" onclick="switchAuthMode('register')" class="flex-1 py-2.5 rounded-xl hover:text-purple-600 transition">Register</button>
+        <button id="tabForgot" onclick="switchAuthMode('forgot')" class="flex-1 py-2.5 rounded-xl hover:text-purple-600 transition">Forgot</button>
+      </div>
+
+      <!-- Form Inputs Container -->
+      <div class="space-y-3.5 text-xs">
+        <div id="authEmailGroup">
+          <label class="block text-slate-600 font-bold mb-1">Gmail Address</label>
+          <input type="email" id="authEmail" placeholder="yourname@gmail.com" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-800 focus:border-purple-500 focus:bg-white focus:outline-none transition">
+        </div>
+
+        <div id="authPwdGroup">
+          <label id="authPwdLabel" class="block text-slate-600 font-bold mb-1">Password</label>
+          <input type="password" id="authPassword" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-800 focus:border-purple-500 focus:bg-white focus:outline-none transition">
+        </div>
+
+        <div id="authRefGroup" style="display: none;">
+          <label class="block text-slate-600 font-bold mb-1">Referral Code (Optional) 🎁</label>
+          <input type="text" id="authRefCode" placeholder="AC-XXXXX" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-800 uppercase focus:border-purple-500 focus:bg-white focus:outline-none transition">
+        </div>
+
+        <div id="authOtpGroup" style="display: none;">
+          <label class="block text-purple-700 font-bold mb-1">6-Digit Gmail OTP 📩</label>
+          <input type="text" id="authOtp" maxlength="6" placeholder="000000" class="w-full text-center tracking-[10px] font-bold text-xl bg-purple-50 border-2 border-purple-400 rounded-2xl px-4 py-3 text-purple-900 focus:outline-none">
+        </div>
+
+        <div id="authResetPasswordGroup" style="display: none;" class="space-y-3 pt-1">
+          <div class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] font-bold flex items-center gap-2">
+            <span>✅</span>
+            <span>OTP Verified! Set your new password below:</span>
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">New Password</label>
+            <input type="password" id="authNewPassword" placeholder="Enter new password" class="w-full bg-white border border-purple-300 rounded-2xl px-4 py-3 text-slate-900 focus:border-purple-600 focus:outline-none font-medium">
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">Retype New Password</label>
+            <input type="password" id="authConfirmPassword" placeholder="Retype new password" class="w-full bg-white border border-purple-300 rounded-2xl px-4 py-3 text-slate-900 focus:border-purple-600 focus:outline-none font-medium">
+          </div>
+        </div>
+
+        <button id="btnAuthAction" onclick="handleAuthSubmit()" class="w-full btn-pollpe-purple font-extrabold py-3.5 rounded-2xl text-xs uppercase tracking-wider mt-2 shadow-md">
+          Sign In
+        </button>
       </div>
     </div>
 
-    <div class="form-group referral-group">
-      <label>Friend's Referral Code (Optional)</label>
-      <div class="input-wrapper">
-        <span class="input-icon">🎁</span>
-        <input type="text" id="reg-referral" placeholder="E.G. AC-XXXXX">
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Verification OTP</label>
-      <div class="otp-wrapper">
-        <input type="text" id="reg-otp" placeholder="Enter OTP from Gmail" maxlength="6">
-        <button type="button" id="btn-reg-otp" class="btn-send-otp" onclick="handleSendRegisterOTP()">Send OTP</button>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Create Password</label>
-      <div class="input-wrapper">
-        <input type="password" id="reg-password" placeholder="Create strong password" style="padding-left: 14px;">
-      </div>
-    </div>
-
-    <button type="button" class="btn-submit" onclick="handleRegister()">Create Account & Proceed</button>
-
-    <div class="links-row">
-      <a onclick="switchView('login')">Already have an account? Sign In</a>
-      <a onclick="switchView('forgot')">Forgot Password?</a>
+    <!-- Right Side Hero Banner -->
+    <div class="w-full md:w-1/2 p-6 rounded-3xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 text-center space-y-4">
+      <div class="text-5xl">🎁</div>
+      <h3 class="text-xl font-black text-slate-800">24-Hour Capital Settlement</h3>
+      <p class="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+        Track your complete yearly deposit & withdrawal history with automated daily returns and instant payouts.
+      </p>
     </div>
   </div>
 
-  <!-- VIEW 2: LOGIN -->
-  <div id="view-login" class="card view-section">
-    <div class="form-group">
-      <label>Registered Gmail Address</label>
-      <div class="input-wrapper">
-        <span class="input-icon">✉</span>
-        <input type="email" id="login-email" placeholder="name@gmail.com">
+  <!-- MAIN DASHBOARD -->
+  <div id="mainDashboard" class="hidden w-full max-w-6xl mx-auto space-y-6 relative z-10">
+    <header class="pollpe-card px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-md">🪙</div>
+        <div>
+          <div class="flex items-center gap-2"><h1 class="font-black text-slate-900 text-base">ACPay<span class="text-purple-600">.</span></h1><span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full">Live Node</span></div>
+          <span id="userEmailDisp" class="text-xs text-slate-400 font-medium">user@gmail.com</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/payment" class="btn-pollpe-emerald text-xs font-black px-4 py-2.5 rounded-2xl transition">➕ Add Money</a>
+        <button onclick="logout()" class="bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 text-xs font-bold px-3 py-2.5 rounded-2xl transition"><i class="fa-solid fa-power-off"></i></button>
+      </div>
+    </header>
+
+    <!-- Balance & Referral Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="pollpe-card p-6 flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+          <div class="flex items-center gap-4">
+            <div class="text-5xl">💵</div>
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Balance</span>
+              <div class="flex items-center gap-2 mt-0.5"><span class="text-2xl">🪙</span><span id="userBalance" class="text-3xl font-black text-slate-900">₹0.00</span></div>
+              <span class="text-[11px] text-purple-600 font-bold mt-1 block">🔒 24-Hour Mandatory Lock</span>
+            </div>
+          </div>
+          <button onclick="switchTab('withdraw')" class="btn-pollpe-purple text-xs font-black px-5 py-2.5 rounded-2xl">Withdraw</button>
+        </div>
+        <div class="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center text-xs">
+          <div class="flex items-center gap-1.5 text-slate-500 font-bold"><span>📈 Today's Yield:</span><span id="userTodayEarn" class="text-emerald-600 font-extrabold text-sm">₹0.00</span></div>
+          <button onclick="switchTab('history')" class="text-purple-600 font-extrabold hover:underline">View 1-Year History ➔</button>
+        </div>
+      </div>
+
+      <div class="pollpe-card p-6 flex items-center justify-between bg-gradient-to-r from-purple-50/80 to-white">
+        <div class="flex items-center gap-4">
+          <div class="text-5xl">👾</div>
+          <div>
+            <span class="text-[11px] font-black text-purple-600 uppercase tracking-wider">REFER & EARN</span>
+            <h3 class="text-base font-black text-slate-800 mt-0.5">Invite Friend & Get ₹800 🪙</h3>
+            <p class="text-xs text-slate-500 mt-0.5">+ 30% of their plan deposit forever</p>
+            <div class="flex items-center gap-2 mt-2">
+              <span id="userRefCode" class="text-xs font-extrabold font-mono text-purple-700 bg-purple-100 px-3 py-1 rounded-xl">AC-00000</span>
+              <button onclick="copyReferralLink()" class="text-xs text-purple-600 font-extrabold hover:underline">Copy Link 📋</button>
+            </div>
+          </div>
+        </div>
+        <button onclick="openTaskModal()" class="btn-pollpe-purple text-xs font-black px-4 py-2.5 rounded-2xl">Invite Now 🚀</button>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Password</label>
-      <div class="input-wrapper">
-        <input type="password" id="login-password" placeholder="Enter your password" style="padding-left: 14px;">
+    <!-- 3-DAY REFERRAL & 6-DAY 18% CLAIM HUB -->
+    <div id="yieldLifecycleHub" class="pollpe-card p-6 border-2 border-purple-200/80 shadow-md space-y-4">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-100 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">⚡</span>
+            <h3 class="font-black text-slate-900 text-base" id="hubTitle">3-Day Referral Window Active</h3>
+            <span id="hubBadge" class="text-[10px] font-black bg-purple-100 text-purple-700 px-2.5 py-0.5 rounded-full">STAGE 1</span>
+          </div>
+          <p class="text-xs text-slate-500 font-semibold mt-0.5" id="hubSubtitle">
+            Refer a friend within 3 days to receive 30% commission + ₹800 bonus! If offer expires, switch to 6-day 18% daily claims.
+          </p>
+        </div>
+
+        <div class="text-right">
+          <span class="text-[10px] font-black uppercase text-slate-400 block" id="hubTimerLabel">Offer Time Remaining</span>
+          <span class="text-base font-black font-mono text-purple-700" id="hubCountdown">72h 00m 00s</span>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex justify-between items-center text-xs font-bold text-slate-600">
+          <span>6-Day Daily 18% Claim Progress</span>
+          <span id="claimsCountText" class="font-mono text-purple-700 font-black">0 / 6 Claims Completed</span>
+        </div>
+
+        <div class="grid grid-cols-6 gap-2">
+          <div id="dayCircle_1" class="p-3 text-center rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 font-black text-xs">Day 1<br><span class="text-[10px]">18%</span></div>
+          <div id="dayCircle_2" class="p-3 text-center rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 font-black text-xs">Day 2<br><span class="text-[10px]">18%</span></div>
+          <div id="dayCircle_3" class="p-3 text-center rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 font-black text-xs">Day 3<br><span class="text-[10px]">18%</span></div>
+          <div id="dayCircle_4" class="p-3 text-center rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 font-black text-xs">Day 4<br><span class="text-[10px]">18%</span></div>
+          <div id="dayCircle_5" class="p-3 text-center rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 font-black text-xs">Day 5<br><span class="text-[10px]">18%</span></div>
+          <div id="dayCircle_6" class="p-3 text-center rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 font-black text-xs">Day 6<br><span class="text-[10px]">18%</span></div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <span class="text-xs text-slate-500 font-medium" id="claimHelpText">
+          Complete all 6 daily claims to unlock balance for withdrawal.
+        </span>
+        <button id="btnClaimDaily" onclick="submitDaily18Claim()" disabled class="w-full sm:w-auto bg-slate-200 text-slate-400 font-black px-6 py-3 rounded-2xl text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
+          <span>🎁</span> Claim Daily 18% (Locked)
+        </button>
       </div>
     </div>
 
-    <button type="button" class="btn-submit" onclick="handleLogin()">Sign In</button>
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+      <button id="btnTabPlans" onclick="switchTab('plans')" class="tab-pill-active px-5 py-2.5 rounded-2xl font-black flex items-center gap-2 transition"><span>💎</span> Investment Plans</button>
+      <button id="btnTabHistory" onclick="switchTab('history')" class="bg-white hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-2xl font-black border border-slate-200 flex items-center gap-2 transition shadow-sm"><span>📊</span> 1-Year History</button>
+      <button id="btnTabSubscriptions" onclick="switchTab('subscriptions')" class="bg-white hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-2xl font-black border border-slate-200 flex items-center gap-2 transition shadow-sm"><span>⚡</span> Subscriptions</button>
+      <button id="btnTabActivity" onclick="switchTab('activity')" class="bg-white hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-2xl font-black border border-slate-200 flex items-center gap-2 transition shadow-sm"><span>📜</span> Logs</button>
+      <button id="btnTabUpi" onclick="switchTab('upi')" class="bg-white hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-2xl font-black border border-slate-200 flex items-center gap-2 transition shadow-sm"><span>🏦</span> Add Bank</button>
+      <button id="btnTabWithdraw" onclick="switchTab('withdraw')" class="bg-white hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-2xl font-black border border-slate-200 flex items-center gap-2 transition shadow-sm"><span>💸</span> Withdrawal</button>
+    </div>
 
-    <div class="links-row">
-      <a onclick="switchView('register')">Create New Account</a>
-      <a onclick="switchView('forgot')">Forgot Password?</a>
+    <!-- TAB 1: 5 FIXED PLANS (UPDATED WITH 18% DAILY CLAIM CONCEPT) -->
+    <div id="viewPlans" class="space-y-8">
+      <div class="space-y-4">
+        <div class="flex justify-between items-center">
+          <div><h2 class="text-lg font-black text-slate-900">Recommended Yield Tiers ⭐</h2><p class="text-xs text-slate-400 font-bold">Pick an offer, complete deposit, and unlock daily returns.</p></div>
+          <span class="text-xs font-extrabold text-purple-700 bg-purple-100 px-3 py-1 rounded-full">5 Fixed Offers</span>
+        </div>
+        <div id="plansContainer" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+      </div>
+
+      <!-- MIDDLE ROW: QUEST CARD + SURVEY PARTNERS -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
+        <div class="lg:col-span-5 pollpe-card p-6 flex flex-col justify-between border border-slate-200/80">
+          <div>
+            <div class="flex justify-between items-start">
+              <div><h3 class="font-black text-slate-900 text-base">Woohoo! Quest for you 🎉</h3><p class="text-xs text-slate-500 font-semibold mt-0.5">Earn Elite Yield badge & ₹10 (🪙 1000)</p></div>
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-md">🏆</div>
+            </div>
+            <div class="my-3 py-2 px-3 bg-rose-50 border border-rose-200/60 rounded-xl flex items-center gap-2 text-xs font-bold text-rose-600">
+              <span>⏱️</span><span>Quest ends in <span class="font-black font-mono">23h 59m 40s</span></span>
+            </div>
+            <div class="space-y-3 pt-2 text-xs font-bold text-slate-700">
+              <div onclick="openTaskModal()" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition cursor-pointer">
+                <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full border-2 border-slate-300"></span><span>Earn from Liquidity Share</span></div>
+                <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+              </div>
+              <div onclick="openTaskModal()" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition cursor-pointer">
+                <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full border-2 border-slate-300"></span><span>Complete a Node Task</span></div>
+                <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+              </div>
+              <div onclick="openTaskModal()" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition cursor-pointer">
+                <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full border-2 border-slate-300"></span><span>Earn from Prime Referrals</span></div>
+                <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div onclick="openTaskModal()" class="pollpe-card p-5 hover:border-purple-300 transition cursor-pointer flex flex-col justify-between">
+            <div class="flex items-center gap-1.5 text-slate-800 font-black text-xs"><span class="text-purple-600">📊</span><span>theoremreach</span></div>
+            <div class="mt-4"><span class="text-[10px] text-slate-400 font-bold block uppercase">Earn upto</span><div class="flex items-center gap-1 font-black text-slate-900 text-sm mt-0.5"><span>🪙</span><span>250-700</span></div></div>
+          </div>
+          <div onclick="openTaskModal()" class="pollpe-card p-5 hover:border-purple-300 transition cursor-pointer flex flex-col justify-between">
+            <div class="flex items-center gap-1 text-slate-800 font-black text-xs"><span class="bg-sky-500 text-white text-[9px] px-1 py-0.5 rounded font-black">A</span><span class="text-sky-600 font-black">Bit<span class="text-slate-900">Labs</span></span></div>
+            <div class="mt-4"><span class="text-[10px] text-slate-400 font-bold block uppercase">Earn upto</span><div class="flex items-center gap-1 font-black text-slate-900 text-sm mt-0.5"><span>🪙</span><span>250-700</span></div></div>
+          </div>
+          <div onclick="openTaskModal()" class="pollpe-card p-5 hover:border-purple-300 transition cursor-pointer flex flex-col justify-between">
+            <div class="flex items-center gap-1.5 text-indigo-600 font-black text-xs"><i class="fa-solid fa-bookmark text-indigo-500 text-xs"></i><span class="text-slate-900">Prime Surveys</span></div>
+            <div class="mt-4"><span class="text-[10px] text-slate-400 font-bold block uppercase">Earn upto</span><div class="flex items-center gap-1 font-black text-slate-900 text-sm mt-0.5"><span>🪙</span><span>250-700</span></div></div>
+          </div>
+          <div onclick="openTaskModal()" class="pollpe-card p-5 hover:border-purple-300 transition cursor-pointer flex flex-col justify-between">
+            <div class="flex items-center gap-1.5 text-emerald-600 font-black text-xs"><i class="fa-solid fa-circle-notch text-emerald-500 text-xs"></i><span class="text-slate-900">CPX RESEARCH</span></div>
+            <div class="mt-4"><span class="text-[10px] text-slate-400 font-bold block uppercase">Earn upto</span><div class="flex items-center gap-1 font-black text-slate-900 text-sm mt-0.5"><span>🪙</span><span>250-700</span></div></div>
+          </div>
+          <div onclick="openTaskModal()" class="pollpe-card p-5 hover:border-purple-300 transition cursor-pointer flex flex-col justify-between">
+            <div class="flex items-center gap-1.5 text-amber-600 font-black text-xs"><span>🧠</span><span class="text-slate-900">inBrain.ai</span></div>
+            <div class="mt-4"><span class="text-[10px] text-slate-400 font-bold block uppercase">Earn upto</span><div class="flex items-center gap-1 font-black text-slate-900 text-sm mt-0.5"><span>🪙</span><span>300-850</span></div></div>
+          </div>
+          <div onclick="openTaskModal()" class="pollpe-card p-5 hover:border-purple-300 transition cursor-pointer flex flex-col justify-between">
+            <div class="flex items-center gap-1.5 text-purple-600 font-black text-xs"><span>⚡</span><span class="text-slate-900">Quick Pulse</span></div>
+            <div class="mt-4"><span class="text-[10px] text-slate-400 font-bold block uppercase">Earn upto</span><div class="flex items-center gap-1 font-black text-slate-900 text-sm mt-0.5"><span>🪙</span><span>150-500</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW: RECOMMENDED OFFERS GRID -->
+      <div class="space-y-4 pt-2">
+        <div class="flex justify-between items-center"><h3 class="font-black text-slate-900 text-base">Recommended Offers</h3><span class="text-xs font-bold text-slate-400">Verified Cashback</span></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div class="pollpe-card overflow-hidden border border-slate-100 flex flex-col justify-between pollpe-card-hover">
+            <div class="h-32 bg-slate-800 relative flex items-center justify-center text-white overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+              <div class="text-5xl opacity-40">🙂</div>
+              <span class="absolute top-3 right-3 z-20 bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-500/40">NEW</span>
+              <div class="absolute bottom-3 left-4 z-20 flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-sm shadow">😊</div><span class="font-black text-sm text-white">HappyYou</span></div>
+            </div>
+            <div class="p-4 flex items-center justify-between">
+              <div><span class="text-[10px] text-slate-400 font-bold block">REWARD</span><span class="font-black text-slate-900 text-sm">200 🪙</span></div>
+              <button onclick="claimOffer('HappyYou', 200)" class="btn-pollpe-purple font-black py-2 px-5 rounded-2xl text-xs shadow-md">Get Rewards</button>
+            </div>
+          </div>
+
+          <div class="pollpe-card overflow-hidden border border-slate-100 flex flex-col justify-between pollpe-card-hover">
+            <div class="h-32 bg-rose-950 relative flex items-center justify-center text-white overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+              <div class="text-5xl opacity-40 font-black tracking-widest text-rose-500">NYKAA</div>
+              <span class="absolute top-3 right-3 z-20 bg-rose-500/20 text-rose-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-rose-500/40">HOT</span>
+              <div class="absolute bottom-3 left-4 z-20 flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-rose-600 text-white font-black text-xs flex items-center justify-center shadow">N</div><span class="font-black text-sm text-white">Nykaa Fashion</span></div>
+            </div>
+            <div class="p-4 flex items-center justify-between">
+              <div><span class="text-[10px] text-slate-400 font-bold block">REWARD</span><span class="font-black text-slate-900 text-sm">300 🪙</span></div>
+              <button onclick="claimOffer('Nykaa Fashion', 300)" class="btn-pollpe-purple font-black py-2 px-5 rounded-2xl text-xs shadow-md">Get Rewards</button>
+            </div>
+          </div>
+
+          <div class="pollpe-card overflow-hidden border border-slate-100 flex flex-col justify-between pollpe-card-hover">
+            <div class="h-32 bg-orange-950 relative flex items-center justify-center text-white overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+              <div class="text-5xl opacity-40">⚡</div>
+              <span class="absolute top-3 right-3 z-20 bg-amber-500/20 text-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-500/40">TRENDING</span>
+              <div class="absolute bottom-3 left-4 z-20 flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-orange-500 text-white font-black text-xs flex items-center justify-center shadow">📈</div><span class="font-black text-sm text-white">StockGro</span></div>
+            </div>
+            <div class="p-4 flex items-center justify-between">
+              <div><span class="text-[10px] text-slate-400 font-bold block">REWARD</span><span class="font-black text-slate-900 text-sm">100 🪙</span></div>
+              <button onclick="claimOffer('StockGro', 100)" class="btn-pollpe-purple font-black py-2.5 px-5 rounded-2xl text-xs shadow-md">Get Rewards</button>
+            </div>
+          </div>
+
+          <div class="pollpe-card overflow-hidden border border-slate-100 flex flex-col justify-between pollpe-card-hover">
+            <div class="h-32 bg-indigo-950 relative flex items-center justify-center text-white overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+              <div class="text-4xl opacity-40">🧱</div>
+              <div class="absolute bottom-3 left-4 z-20 flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center shadow">🎲</div><span class="font-black text-sm text-white">Fusion Blocks</span></div>
+            </div>
+            <div class="p-4 flex items-center justify-between">
+              <div><span class="text-[10px] text-slate-400 font-bold block">REWARD</span><span class="font-black text-slate-900 text-sm">220 🪙</span></div>
+              <button onclick="claimOffer('Fusion Blocks', 220)" class="btn-pollpe-purple font-black py-2 px-5 rounded-2xl text-xs shadow-md">Get Rewards</button>
+            </div>
+          </div>
+
+          <div class="pollpe-card overflow-hidden border border-slate-100 flex flex-col justify-between pollpe-card-hover">
+            <div class="h-32 bg-red-950 relative flex items-center justify-center text-white overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+              <div class="text-5xl opacity-40">🚌</div>
+              <div class="absolute bottom-3 left-4 z-20 flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-red-600 text-white font-black text-xs flex items-center justify-center shadow">🚌</div><span class="font-black text-sm text-white">redBus</span></div>
+            </div>
+            <div class="p-4 flex items-center justify-between">
+              <div><span class="text-[10px] text-slate-400 font-bold block">REWARD</span><span class="font-black text-slate-900 text-sm">250 🪙</span></div>
+              <button onclick="claimOffer('redBus', 250)" class="btn-pollpe-purple font-black py-2 px-5 rounded-2xl text-xs shadow-md">Get Rewards</button>
+            </div>
+          </div>
+
+          <div class="pollpe-card overflow-hidden border border-slate-100 flex flex-col justify-between pollpe-card-hover">
+            <div class="h-32 bg-amber-950 relative flex items-center justify-center text-white overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+              <div class="text-5xl opacity-40">🍔</div>
+              <div class="absolute bottom-3 left-4 z-20 flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-amber-500 text-white font-black text-xs flex items-center justify-center shadow">🍕</div><span class="font-black text-sm text-white">Swiggy Gourmet</span></div>
+            </div>
+            <div class="p-4 flex items-center justify-between">
+              <div><span class="text-[10px] text-slate-400 font-bold block">REWARD</span><span class="font-black text-slate-900 text-sm">180 🪙</span></div>
+              <button onclick="claimOffer('Swiggy Gourmet', 180)" class="btn-pollpe-purple font-black py-2 px-5 rounded-2xl text-xs shadow-md">Get Rewards</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 1-YEAR TRANSACTION HISTORY -->
+    <div id="viewHistory" class="hidden pollpe-card p-6 space-y-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-100 pb-4">
+        <div><h3 class="text-base font-black text-slate-900 flex items-center gap-2"><span>📊</span> 1-Year Financial Statement & History</h3><p class="text-xs text-slate-400 font-bold">Audit records of every deposit and payout over the last 365 days.</p></div>
+        <div class="flex items-center gap-2">
+          <select id="historyTypeFilter" onchange="filterHistoryDisplay()" class="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 rounded-xl px-3 py-2">
+            <option value="ALL">All Transactions</option>
+            <option value="DEPOSIT">Deposits Only</option>
+            <option value="WITHDRAWAL">Withdrawals Only</option>
+          </select>
+          <select id="historyRangeFilter" onchange="filterHistoryDisplay()" class="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 rounded-xl px-3 py-2">
+            <option value="365">Last 1 Year (365 Days)</option>
+            <option value="30">Last 30 Days</option>
+            <option value="ALL">All-Time Lifetime</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center gap-3">
+          <div class="text-3xl">📥</div>
+          <div><span class="text-[10px] uppercase font-black text-emerald-700 tracking-wider">Deposited (Last 1 Year)</span><div id="histDep1Year" class="text-xl font-black text-emerald-800 font-mono mt-0.5">₹0.00</div></div>
+        </div>
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-center gap-3">
+          <div class="text-3xl">📤</div>
+          <div><span class="text-[10px] uppercase font-black text-rose-700 tracking-wider">Withdrawn (Last 1 Year)</span><div id="histWth1Year" class="text-xl font-black text-rose-800 font-mono mt-0.5">₹0.00</div></div>
+        </div>
+        <div class="p-4 rounded-2xl bg-purple-50 border border-purple-100 flex items-center gap-3">
+          <div class="text-3xl">⚖️</div>
+          <div><span class="text-[10px] uppercase font-black text-purple-700 tracking-wider">Net Position</span><div id="histNet1Year" class="text-xl font-black text-purple-800 font-mono mt-0.5">₹0.00</div></div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-50 text-slate-500 font-black uppercase text-[10px]">
+            <tr>
+              <th class="p-3.5">Type</th>
+              <th class="p-3.5">Reference / UTR</th>
+              <th class="p-3.5">Payment Route</th>
+              <th class="p-3.5">Amount</th>
+              <th class="p-3.5">Status</th>
+              <th class="p-3.5">Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="historyRows" class="divide-y divide-slate-100 bg-white font-medium"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: SUBSCRIPTIONS -->
+    <div id="viewSubscriptions" class="hidden pollpe-card p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+        <div><h3 class="text-base font-black text-slate-900">Active Subscriptions</h3><p class="text-xs text-slate-400 font-bold">24-hour cycle unlocks automatically.</p></div>
+        <button onclick="openTaskModal()" class="btn-pollpe-purple px-4 py-2 rounded-2xl text-xs font-black">Tasks 🏆</button>
+      </div>
+      <div id="subscriptionsList" class="space-y-3"></div>
+    </div>
+
+    <!-- TAB 4: ACTIVITY LOGS -->
+    <div id="viewActivity" class="hidden pollpe-card p-6 space-y-4">
+      <h3 class="text-base font-black text-slate-900">Account History Logs</h3>
+      <div id="activityLogsList" class="space-y-2.5"></div>
+    </div>
+
+    <!-- TAB 5: ADD UPI / BANK -->
+    <div id="viewUpi" class="hidden max-w-lg pollpe-card p-6 md:p-8 space-y-4">
+      <h3 class="text-base font-black text-slate-900">Bind Settlement Account 🏦</h3>
+      <div class="space-y-3 text-xs">
+        <div><label class="block text-slate-600 font-bold mb-1">UPI ID (VPA)</label><input type="text" id="bindUpiId" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-slate-800"></div>
+        <div><label class="block text-slate-600 font-bold mb-1">Bank Name</label><input type="text" id="bindBankName" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-slate-800"></div>
+        <div><label class="block text-slate-600 font-bold mb-1">Account Number</label><input type="text" id="bindAccNumber" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-slate-800"></div>
+        <div><label class="block text-slate-600 font-bold mb-1">IFSC Code</label><input type="text" id="bindIfsc" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-slate-800 uppercase"></div>
+        <button onclick="handleSaveUpi()" class="w-full btn-pollpe-purple font-black py-3 rounded-2xl transition mt-2">Save Account Details</button>
+      </div>
+    </div>
+
+    <!-- TAB 6: WITHDRAWAL -->
+    <div id="viewWithdraw" class="hidden max-w-lg pollpe-card p-6 md:p-8 space-y-4">
+      <h3 class="text-base font-black text-slate-900">Request Withdrawal 💸</h3>
+      <div class="space-y-3 text-xs">
+        <div><label class="block text-slate-600 font-bold mb-1">Amount (₹)</label><input type="number" id="withdrawAmount" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-slate-900 font-black text-base"></div>
+        <div><label class="block text-slate-600 font-bold mb-1">Destination Method</label><input type="text" id="withdrawMethod" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-slate-800"></div>
+        <button onclick="handleRequestWithdraw()" class="w-full btn-pollpe-emerald font-black py-3 rounded-2xl transition mt-2">Confirm Payout Request</button>
+      </div>
     </div>
   </div>
 
-  <!-- VIEW 3: FORGOT PASSWORD (POINT 2) -->
-  <div id="view-forgot" class="card view-section">
-    <div class="form-group">
-      <label>Registered Gmail Address</label>
-      <div class="input-wrapper">
-        <span class="input-icon">✉</span>
-        <input type="email" id="forgot-email" placeholder="name@gmail.com">
+  <!-- REFERRAL TASK MODAL -->
+  <div id="taskModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="max-w-md w-full pollpe-card p-6 relative space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-black text-slate-800 text-base">Referral Task Center 🎁</h3>
+        <button onclick="closeTaskModal()" class="text-slate-400 hover:text-slate-700 text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
-    </div>
-
-    <div class="form-group">
-      <label>Verification OTP</label>
-      <div class="otp-wrapper">
-        <input type="text" id="forgot-otp" placeholder="Enter OTP from Gmail" maxlength="6">
-        <button type="button" id="btn-forgot-otp" class="btn-send-otp" onclick="handleSendForgotOTP()">Send OTP</button>
+      <div class="space-y-3 text-xs">
+        <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100 space-y-2">
+          <div class="text-xl font-black text-purple-900">30% Bonus + Flat ₹800 🪙</div>
+          <p class="text-slate-600 text-[11px]">When a friend activates a plan, you immediately get 30% commission + ₹800 flat bonus!</p>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+          <input type="text" id="taskRefLink" readonly class="bg-transparent text-purple-700 text-xs w-full font-mono font-bold">
+          <button onclick="copyReferralLink()" class="btn-pollpe-purple px-3 py-1.5 rounded-xl text-xs font-black">Copy</button>
+        </div>
       </div>
-    </div>
-
-    <div class="form-group">
-      <label>New Password</label>
-      <div class="input-wrapper">
-        <input type="password" id="forgot-newpass" placeholder="Create new strong password" style="padding-left: 14px;">
-      </div>
-    </div>
-
-    <button type="button" class="btn-submit" onclick="handleResetPassword()">Update Password</button>
-
-    <div class="links-row">
-      <a onclick="switchView('login')">Back to Sign In</a>
+      <button onclick="closeTaskModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-2xl text-xs">Close</button>
     </div>
   </div>
 
-  <!-- VIEW 4: USER DASHBOARD (PROFILE, WALLET POINTS, ADD UPI, BUY PLANS) -->
-  <div id="view-dashboard" class="card view-section">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h3 style="color:#0f172a; font-size:18px;">User Dashboard</h3>
-      <a onclick="handleLogout()" style="color:#dc2626; font-size:13px; font-weight:700; cursor:pointer;">Logout</a>
-    </div>
-
-    <div class="wallet-box">
-      <div>
-        <div style="font-size:11px; color:#94a3b8; text-transform:uppercase;">User Profile</div>
-        <div id="dash-email" style="font-size:13px; font-weight:600;"></div>
-        <div style="font-size:18px; font-weight:700; color:#4ade80; margin-top:4px;" id="dash-points">0 Valid Points</div>
+  <!-- FLOATING CHAT -->
+  <div id="floatingChatContainer" class="hidden fixed bottom-6 right-6 z-50">
+    <button onclick="toggleChatWindow()" class="w-14 h-14 rounded-full btn-pollpe-purple text-white shadow-xl flex items-center justify-center hover:scale-105 transition border-2 border-white"><i class="fa-solid fa-headset text-xl"></i></button>
+    <div id="chatWindow" class="hidden fixed bottom-24 right-6 w-80 md:w-96 pollpe-card overflow-hidden flex flex-col h-[480px] shadow-2xl border border-slate-200">
+      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 text-white flex justify-between items-center">
+        <div><h4 class="font-black text-xs">ACPay Support Desk</h4><p class="text-[9px] text-white/80 font-bold">Hours: 7:00 AM to 12:00 midnight</p></div>
+        <button onclick="toggleChatWindow()" class="text-white/80 hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div id="admin-indicator"></div>
-    </div>
-
-    <!-- ADD UPI SECTION -->
-    <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:16px;">
-      <label style="margin-bottom:6px;">Add UPI ID</label>
-      <div style="display:flex; gap:8px;">
-        <input type="text" id="upi-input" placeholder="e.g. username@okhdfcbank" style="padding-left:12px;">
-        <button type="button" class="btn-send-otp" style="padding:0 14px;" onclick="handleSaveUPI()">Save UPI</button>
+      <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs text-slate-700"></div>
+      <div class="p-3 bg-white border-t border-slate-100 flex gap-2">
+        <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Type a message..." class="flex-1 bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-2xl px-3.5 py-2.5 focus:outline-none">
+        <button onclick="sendChatMessage()" class="w-10 h-10 rounded-2xl btn-pollpe-purple flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
       </div>
-      <div id="upi-display" style="font-size:11px; color:#047857; margin-top:6px; font-weight:600;"></div>
-    </div>
-
-    <label style="margin-bottom: 10px;">Select Buy Plan Option</label>
-
-    <div class="plan-item">
-      <div>
-        <strong>Tier 1 Plan</strong>
-        <div style="font-size:12px; color:#64748b;">₹18,500 (18,500 Points)</div>
-      </div>
-      <button class="btn-send-otp" style="padding: 8px 14px;" onclick="selectPlan(18500, 'Tier 1 Plan')">Buy Plan</button>
-    </div>
-
-    <div class="plan-item">
-      <div>
-        <strong>Tier 2 Plan</strong>
-        <div style="font-size:12px; color:#64748b;">₹35,000 (35,000 Points)</div>
-      </div>
-      <button class="btn-send-otp" style="padding: 8px 14px;" onclick="selectPlan(35000, 'Tier 2 Plan')">Buy Plan</button>
-    </div>
-
-    <div class="plan-item">
-      <div>
-        <strong>Tier 3 Plan</strong>
-        <div style="font-size:12px; color:#64748b;">₹50,000 (50,000 Points)</div>
-      </div>
-      <button class="btn-send-otp" style="padding: 8px 14px;" onclick="selectPlan(50000, 'Tier 3 Plan')">Buy Plan</button>
-    </div>
-
-    <div style="text-align:center; margin-top:16px;">
-      <a id="btn-admin-link" style="display:none; color:#0369a1; font-weight:700; font-size:13px; cursor:pointer;" onclick="switchView('admin')">→ Open Admin Panel</a>
     </div>
   </div>
 
-  <!-- VIEW 5: PAYMENT SCANNER & 12-DIGIT UTR SUBMISSION (POINT 3) -->
-  <div id="view-payment" class="card view-section">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h3 style="color:#0f172a; font-size:18px;">Payment & Deposit</h3>
-      <a onclick="switchView('dashboard')" style="color:#0369a1; font-size:13px; font-weight:700; cursor:pointer;">Cancel</a>
-    </div>
+  <script>
+    let authMode = 'login';
+    let otpSent = false;
+    let forgotOtpVerified = false;
+    let currentUser = null;
+    let chatPollTimer = null;
+    let rawTransactions = [];
+    const planStickers = ['🌱', '🥈', '🥇', '👑', '💎'];
 
-    <p style="font-size:13px; color:#334155; margin-top:8px;">Plan: <strong id="pay-plan-name"></strong> | Amount: <strong id="pay-plan-amount"></strong></p>
-
-    <div class="scanner-box">
-      <img id="qr-display" src="" alt="UPI QR Code">
-      <div style="text-align:left; background:#fff; padding:10px; border-radius:6px; font-size:12px; border:1px solid #cbd5e1; margin-top:8px;">
-        <p><strong>UPI ID:</strong> <code>acpay@sbi</code></p>
-        <p><strong>Bank Account:</strong> 30012345678</p>
-        <p><strong>Bank:</strong> State Bank of India</p>
-        <p><strong>IFSC:</strong> SBIN0000847</p>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Enter 12-Digit UTR Number</label>
-      <input type="text" id="utr-number" placeholder="e.g. 430123456789" maxlength="12" style="padding-left:14px;">
-    </div>
-
-    <button type="button" class="btn-submit" onclick="handleSubmitUTR()">Submit 12-Digit UTR</button>
-  </div>
-
-  <!-- VIEW 6: ADMIN PANEL (POINT 4) -->
-  <div id="view-admin" class="card view-section" style="max-width: 600px;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h3 style="color:#0f172a; font-size:18px;">Admin Control Panel</h3>
-      <a onclick="switchView('dashboard')" style="color:#0369a1; font-size:13px; font-weight:700; cursor:pointer;">Back to App</a>
-    </div>
-
-    <label style="margin-top: 14px;">Submitted 12-Digit UTRs</label>
-    <div style="overflow-x: auto;">
-      <table id="table-utrs">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Amount</th>
-            <th>UTR</th>
-            <th>Points to Add</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <label style="margin-top: 20px;">Registered User Ledger</label>
-    <div style="overflow-x: auto;">
-      <table id="table-users">
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>UPI ID</th>
-            <th>Valid Points</th>
-            <th>Role</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="footer-note">
-    Protected by ACPay Real Gmail OTP Verification
-  </div>
-
-<script>
-  let token = localStorage.getItem('acpay_token');
-  let selectedPlan = { amount: 18500, name: 'Tier 1 Plan' };
-
-  function switchView(viewName) {
-    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    document.getElementById(`view-${viewName}`).classList.add('active');
-
-    if (viewName === 'dashboard') loadDashboard();
-    if (viewName === 'admin') loadAdminData();
-  }
-
-  // 1. Send OTP for Registration
-  async function handleSendRegisterOTP() {
-    const email = document.getElementById('reg-email').value.trim();
-    const btn = document.getElementById('btn-reg-otp');
-    if (!email) return alert('Please enter your Gmail address first.');
-
-    btn.disabled = true;
-    btn.innerText = 'Sending...';
-
-    try {
-      const res = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert('OTP sent to your Gmail inbox!');
-        btn.innerText = 'Sent ✓';
-      } else {
-        alert(data.error || 'Failed to dispatch OTP');
-        btn.disabled = false;
-        btn.innerText = 'Send OTP';
+    window.onload = async () => {
+      const savedEmail = localStorage.getItem('acpay_user_email');
+      if (savedEmail) {
+        try {
+          const res = await fetch(`/api/user/profile?email=${encodeURIComponent(savedEmail)}`);
+          const data = await res.json();
+          if (data.success) {
+            currentUser = data.user;
+            showDashboard();
+          }
+        } catch (e) {
+          localStorage.removeItem('acpay_user_email');
+        }
       }
-    } catch (err) {
-      alert('Network Error: Server is waking up. Please wait 10 seconds and retry.');
-      btn.disabled = false;
-      btn.innerText = 'Send OTP';
+    };
+
+    function switchAuthMode(mode) {
+      authMode = mode;
+      otpSent = false;
+      forgotOtpVerified = false;
+
+      document.getElementById('authOtp').value = '';
+      document.getElementById('authNewPassword').value = '';
+      document.getElementById('authConfirmPassword').value = '';
+      document.getElementById('authEmail').readOnly = false;
+
+      document.getElementById('authOtpGroup').style.display = 'none';
+      document.getElementById('authResetPasswordGroup').style.display = 'none';
+      document.getElementById('authEmailGroup').style.display = 'block';
+      document.getElementById('authRefGroup').style.display = (mode === 'register') ? 'block' : 'none';
+      document.getElementById('authPwdGroup').style.display = (mode === 'forgot') ? 'none' : 'block';
+
+      document.getElementById('tabLogin').className = mode === 'login' ? 'flex-1 py-2.5 rounded-xl tab-pill-active transition' : 'flex-1 py-2.5 rounded-xl hover:text-purple-600 transition';
+      document.getElementById('tabRegister').className = mode === 'register' ? 'flex-1 py-2.5 rounded-xl tab-pill-active transition' : 'flex-1 py-2.5 rounded-xl hover:text-purple-600 transition';
+      document.getElementById('tabForgot').className = mode === 'forgot' ? 'flex-1 py-2.5 rounded-xl tab-pill-active transition' : 'flex-1 py-2.5 rounded-xl hover:text-purple-600 transition';
+
+      const btn = document.getElementById('btnAuthAction');
+      if (mode === 'login') btn.innerText = 'Sign In';
+      else if (mode === 'register') btn.innerText = 'Send Verification Code 📩';
+      else btn.innerText = 'Send Password Reset Code';
     }
-  }
 
-  // 2. Register Account
-  async function handleRegister() {
-    const email = document.getElementById('reg-email').value.trim();
-    const referralCode = document.getElementById('reg-referral').value.trim();
-    const otp = document.getElementById('reg-otp').value.trim();
-    const password = document.getElementById('reg-password').value;
+    async function handleAuthSubmit() {
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      const otp = document.getElementById('authOtp').value.trim();
+      const referralCode = document.getElementById('authRefCode').value.trim();
 
-    if (!email || !otp || !password) return alert('Please fill in Email, OTP, and Password.');
+      if (!email) return alert('Please enter your Gmail address');
 
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, referralCode, otp, password })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        token = data.token;
-        localStorage.setItem('acpay_token', token);
-        alert('Registration successful!');
-        switchView('dashboard');
-      } else {
-        alert(data.error || 'Registration failed');
+      // FORGOT PASSWORD PIPELINE
+      if (authMode === 'forgot') {
+        if (!otpSent) {
+          try {
+            const res = await fetch('/api/auth/forgot-send-otp', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (data.success) {
+              otpSent = true;
+              document.getElementById('authOtpGroup').style.display = 'block';
+              document.getElementById('authEmail').readOnly = true;
+              document.getElementById('btnAuthAction').innerText = 'Verify OTP & Continue 🚀';
+              alert(data.message);
+            } else {
+              alert(data.error);
+            }
+          } catch (e) {
+            alert('Failed to connect to server.');
+          }
+          return;
+        }
+
+        if (otpSent && !forgotOtpVerified) {
+          if (!otp || otp.length !== 6) return alert('Enter the 6-digit OTP code sent to your Gmail inbox.');
+
+          try {
+            const res = await fetch('/api/auth/forgot-verify-otp', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, otp })
+            });
+            const data = await res.json();
+            if (data.success) {
+              forgotOtpVerified = true;
+              document.getElementById('authOtpGroup').style.display = 'none';
+              document.getElementById('authResetPasswordGroup').style.display = 'block';
+              document.getElementById('btnAuthAction').innerText = 'Reset Password & Sign In 🔒';
+              document.getElementById('authNewPassword').focus();
+            } else {
+              alert(data.error);
+            }
+          } catch (e) {
+            alert('Error verifying OTP.');
+          }
+          return;
+        }
+
+        if (forgotOtpVerified) {
+          const newPassword = document.getElementById('authNewPassword').value.trim();
+          const confirmPassword = document.getElementById('authConfirmPassword').value.trim();
+
+          if (!newPassword || newPassword.length < 4) {
+            return alert('Password must be at least 4 characters long.');
+          }
+
+          if (newPassword !== confirmPassword) {
+            return alert('Passwords do not match! Please check your retyped password.');
+          }
+
+          try {
+            const res = await fetch('/api/auth/forgot-reset-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, newPassword, confirmPassword })
+            });
+            const data = await res.json();
+            if (data.success) {
+              alert(data.message);
+              switchAuthMode('login');
+              document.getElementById('authEmail').value = email;
+              document.getElementById('authPassword').focus();
+            } else {
+              alert(data.error);
+            }
+          } catch (e) {
+            alert('Failed to reset password.');
+          }
+          return;
+        }
       }
-    } catch (err) {
-      alert('Network Error: Could not connect to server.');
-    }
-  }
 
-  // 3. Login
-  async function handleLogin() {
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    if (!email || !password) return alert('Enter email and password');
-
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        token = data.token;
-        localStorage.setItem('acpay_token', token);
-        switchView('dashboard');
-      } else {
-        alert(data.error || 'Invalid credentials');
-      }
-    } catch (err) {
-      alert('Network Error: Could not connect to server.');
-    }
-  }
-
-  // 4. Forgot Password Flow
-  async function handleSendForgotOTP() {
-    const email = document.getElementById('forgot-email').value.trim();
-    const btn = document.getElementById('btn-forgot-otp');
-    if (!email) return alert('Enter registered Gmail address');
-
-    btn.disabled = true;
-    btn.innerText = 'Sending...';
-
-    try {
-      const res = await fetch('/api/forgot-password/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert('Reset OTP sent to your email!');
-        btn.innerText = 'Sent ✓';
-      } else {
-        alert(data.error || 'Email not found');
-        btn.disabled = false;
-        btn.innerText = 'Send OTP';
-      }
-    } catch (err) {
-      alert('Network Error: Server is waking up.');
-      btn.disabled = false;
-      btn.innerText = 'Send OTP';
-    }
-  }
-
-  async function handleResetPassword() {
-    const email = document.getElementById('forgot-email').value.trim();
-    const otp = document.getElementById('forgot-otp').value.trim();
-    const newPassword = document.getElementById('forgot-newpass').value;
-
-    if (!email || !otp || !newPassword) return alert('Enter Email, OTP, and New Password.');
-
-    try {
-      const res = await fetch('/api/forgot-password/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp, newPassword })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert(data.message);
-        switchView('login');
-      } else {
-        alert(data.error || 'Password reset failed');
-      }
-    } catch (err) {
-      alert('Network Error: Could not connect to server.');
-    }
-  }
-
-  // 5. User Dashboard & Balance
-  async function loadDashboard() {
-    if (!token) return switchView('login');
-    try {
-      const res = await fetch('/api/user/profile', { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) {
-        handleLogout();
+      // SIGN IN & REGISTER PIPELINE
+      if (!otpSent) {
+        let endpoint = authMode === 'login' ? '/api/auth/login-send-otp' : '/api/auth/register-send-otp';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message);
+          otpSent = true;
+          document.getElementById('authOtpGroup').style.display = 'block';
+          document.getElementById('btnAuthAction').innerText = 'Verify OTP & Continue 🚀';
+        } else alert(data.error);
         return;
       }
-      const data = await res.json();
-      document.getElementById('dash-email').innerText = data.email;
-      document.getElementById('dash-points').innerText = `${data.points} Valid Points`;
-      if (data.upiId) {
-        document.getElementById('upi-display').innerText = `Active UPI: ${data.upiId}`;
-      } else {
-        document.getElementById('upi-display').innerText = '';
-      }
 
-      const adminLink = document.getElementById('btn-admin-link');
-      if (data.role === 'admin') {
-        adminLink.style.display = 'inline-block';
-        document.getElementById('admin-indicator').innerHTML = '<span style="background:#0284c7; color:#fff; font-size:10px; padding:3px 6px; border-radius:4px; font-weight:700;">ADMIN</span>';
-      } else {
-        adminLink.style.display = 'none';
-        document.getElementById('admin-indicator').innerHTML = '';
-      }
-    } catch (e) {
-      console.warn('Dashboard load error:', e.message);
-    }
-  }
+      if (!otp || otp.length !== 6) return alert('Enter 6-digit OTP');
+      let verifyUrl = authMode === 'login' ? '/api/auth/login-verify' : '/api/auth/register-create-account';
+      let payload = { email, password, otp, referralCode };
 
-  async function handleSaveUPI() {
-    const upi = document.getElementById('upi-input').value.trim();
-    if (!upi) return alert('Enter a valid UPI ID');
-
-    try {
-      const res = await fetch('/api/user/save-upi', {
+      const res = await fetch(verifyUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ upiId: upi })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
-      alert(res.ok ? 'UPI ID saved successfully!' : data.error);
-      if (res.ok) loadDashboard();
-    } catch (err) {
-      alert('Network Error saving UPI.');
+      if (data.success) {
+        if (authMode !== 'login') {
+          alert('Registration successful! Please sign in.');
+          switchAuthMode('login');
+        } else {
+          currentUser = data.user;
+          localStorage.setItem('acpay_user_email', currentUser.email);
+          showDashboard();
+        }
+      } else alert(data.error);
     }
-  }
 
-  function selectPlan(amount, name) {
-    selectedPlan = { amount, name };
-    document.getElementById('pay-plan-name').innerText = name;
-    document.getElementById('pay-plan-amount').innerText = `₹${amount.toLocaleString('en-IN')}`;
-    document.getElementById('qr-display').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=acpay@sbi&pn=ACPay%20Services&am=${amount}`;
-    document.getElementById('utr-number').value = '';
-    switchView('payment');
-  }
+    function showDashboard() {
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainDashboard').classList.remove('hidden');
+      document.getElementById('floatingChatContainer').classList.remove('hidden');
 
-  // 6. Submit 12-Digit UTR
-  async function handleSubmitUTR() {
-    const utr = document.getElementById('utr-number').value.trim();
-    if (!/^\d{12}$/.test(utr)) return alert('UTR must be exactly 12 digits');
+      document.getElementById('userEmailDisp').innerText = currentUser.email;
+      document.getElementById('userBalance').innerText = `₹${currentUser.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      document.getElementById('userTodayEarn').innerText = `₹${currentUser.todayEarn.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      document.getElementById('userRefCode').innerText = currentUser.myReferralCode;
+      document.getElementById('taskRefLink').value = `${window.location.origin}/?ref=${currentUser.myReferralCode}`;
 
-    try {
-      const res = await fetch('/api/payment/submit-utr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ planName: selectedPlan.name, amount: selectedPlan.amount, utrNumber: utr })
-      });
-      const data = await res.json();
-      alert(res.ok ? data.message : data.error);
-      if (res.ok) switchView('dashboard');
-    } catch (err) {
-      alert('Network Error submitting UTR.');
+      loadPlans();
+      loadSubscriptions();
+      loadHistory();
+      loadActivity();
+      updateYieldLifecycle();
+
+      if (chatPollTimer) clearInterval(chatPollTimer);
+      chatPollTimer = setInterval(fetchChatHistory, 3000);
+      setInterval(updateYieldLifecycle, 10000);
     }
-  }
 
-  // 7. Admin Functions
-  async function loadAdminData() {
-    try {
-      const res = await fetch('/api/admin/data', { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) {
-        alert('Access restricted to Admin only');
-        return switchView('dashboard');
-      }
+    function logout() {
+      localStorage.removeItem('acpay_user_email');
+      location.reload();
+    }
+
+    // 18% DAILY CLAIM YIELD PLAN CARDS
+    async function loadPlans() {
+      const res = await fetch('/api/packages/list');
       const data = await res.json();
+      const container = document.getElementById('plansContainer');
+      container.innerHTML = '';
+      const activeIds = (currentUser.activePlans || []).map(p => p.planId);
 
-      const txBody = document.querySelector('#table-utrs tbody');
-      txBody.innerHTML = '';
-      data.transactions.forEach(t => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${t.userEmail}</td>
-          <td>₹${t.amount}</td>
-          <td><code>${t.utrNumber}</code></td>
-          <td>
-            ${t.status === 'PENDING' ? `
-              <input type="number" id="pts-${t.id}" value="${t.amount}" style="width:75px; padding:3px; font-size:11px;">
-            ` : `${t.amount} Points`}
-          </td>
-          <td><span class="badge ${t.status}">${t.status}</span></td>
-          <td>
-            ${t.status === 'PENDING' ? `
-              <button style="padding:2px 6px; background:#16a34a; color:#fff; border:none; border-radius:3px; cursor:pointer;" onclick="actionUTR('${t.id}', 'APPROVE')">Approve</button>
-              <button style="padding:2px 6px; background:#dc2626; color:#fff; border:none; border-radius:3px; cursor:pointer;" onclick="actionUTR('${t.id}', 'REJECT')">Reject</button>
-            ` : '-'}
-          </td>
+      data.packages.forEach((pkg, index) => {
+        const isActivated = activeIds.includes(pkg.id);
+        const sticker = planStickers[index] || '💎';
+        const daily18 = Math.round(pkg.amount * 0.18);
+
+        container.innerHTML += `
+          <div class="pollpe-card p-5 flex flex-col justify-between border ${isActivated ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-100'}">
+            <div>
+              <div class="text-3xl mb-1">${sticker}</div>
+              <span class="text-[10px] font-black uppercase text-purple-600 tracking-wider">${pkg.id}</span>
+              <h3 class="font-black text-sm text-slate-800 mt-0.5">${pkg.title}</h3>
+
+              <div class="my-3 py-2 px-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-bold block">DEPOSIT</span>
+                <span class="text-xl font-black text-slate-900">₹${pkg.amount.toLocaleString()}</span>
+              </div>
+
+              <div class="text-xs space-y-1.5 font-bold">
+                <div class="flex justify-between items-center text-slate-700">
+                  <span>Daily Claim (18%):</span>
+                  <span class="text-emerald-600 font-black">+₹${daily18.toLocaleString()}</span>
+                </div>
+                <div class="flex justify-between items-center text-purple-600 text-[11px] font-extrabold">
+                  <span>Claim Cycle:</span>
+                  <span class="bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200">6 Days (18%/day) ⏱️</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4">
+              ${isActivated ? `
+                <button onclick="switchTab('subscriptions')" class="w-full btn-pollpe-emerald font-black py-2.5 rounded-2xl text-xs">✅ Activated</button>
+              ` : `
+                <button onclick="goToPayment('${pkg.id}', ${pkg.amount})" class="w-full btn-pollpe-purple font-black py-2.5 rounded-2xl text-xs">🛒 Buy Plan</button>
+              `}
+            </div>
+          </div>
         `;
-        txBody.appendChild(tr);
       });
-
-      const userBody = document.querySelector('#table-users tbody');
-      userBody.innerHTML = '';
-      data.users.forEach(u => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${u.email}</td><td>${u.upiId || 'Not Added'}</td><td><strong>${u.points}</strong></td><td>${u.role}</td>`;
-        userBody.appendChild(tr);
-      });
-    } catch (e) {
-      alert('Error fetching admin records');
-    }
-  }
-
-  async function actionUTR(transactionId, action) {
-    let customPoints = null;
-    if (action === 'APPROVE') {
-      const inputEl = document.getElementById(`pts-${transactionId}`);
-      if (inputEl) customPoints = Number(inputEl.value);
     }
 
-    try {
-      const res = await fetch('/api/admin/action-utr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ transactionId, action, points: customPoints })
-      });
+    function goToPayment(pkgId, amount) {
+      window.location.href = `/payment?pkg=${pkgId}&amount=${amount}&email=${encodeURIComponent(currentUser.email)}`;
+    }
+
+    function claimOffer(name, reward) {
+      alert(`🎁 Offer started for ${name}! Complete the verification step to collect +${reward} 🪙.`);
+    }
+
+    async function updateYieldLifecycle() {
+      if (!currentUser) return;
+      try {
+        const res = await fetch(`/api/user/yield-status?email=${encodeURIComponent(currentUser.email)}`);
+        const data = await res.json();
+        if (!data.hasActivePlan) return;
+
+        const count = data.completedClaims || 0;
+        document.getElementById('claimsCountText').innerText = `${count} / 6 Claims Completed`;
+
+        for (let i = 1; i <= 6; i++) {
+          const el = document.getElementById(`dayCircle_${i}`);
+          if (i <= count) {
+            el.className = 'p-3 text-center rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-800 font-black text-xs shadow-sm';
+            el.innerHTML = `Day ${i}<br><span class="text-[10px]">Claimed ✓</span>`;
+          } else {
+            el.className = 'p-3 text-center rounded-2xl bg-slate-50 border border-slate-200 text-slate-400 font-black text-xs';
+            el.innerHTML = `Day ${i}<br><span class="text-[10px]">18%</span>`;
+          }
+        }
+
+        const btn = document.getElementById('btnClaimDaily');
+
+        if (!data.isRefOfferExpired) {
+          const hours = Math.floor(data.refTimeRemainingMs / (1000 * 60 * 60));
+          const mins = Math.floor((data.refTimeRemainingMs % (1000 * 60 * 60)) / (1000 * 60));
+          document.getElementById('hubTitle').innerText = '3-Day Referral Window Active';
+          document.getElementById('hubBadge').innerText = 'STAGE 1';
+          document.getElementById('hubBadge').className = 'text-[10px] font-black bg-purple-100 text-purple-700 px-2.5 py-0.5 rounded-full';
+          document.getElementById('hubCountdown').innerText = `${hours}h ${mins}m`;
+          document.getElementById('claimHelpText').innerText = 'Referral Window Active! Refer a friend to collect 30% + ₹800. Daily 18% claims unlock after this 3-day window expires.';
+          btn.disabled = true;
+          btn.className = 'w-full sm:w-auto bg-slate-200 text-slate-400 font-black px-6 py-3 rounded-2xl text-xs cursor-not-allowed';
+          btn.innerHTML = '<span>🔒</span> 18% Claims Locked (In 3-Day Window)';
+        } else if (data.isFullyUnlocked) {
+          document.getElementById('hubTitle').innerText = '6/6 Claims Completed - Payout Unlocked!';
+          document.getElementById('hubBadge').innerText = 'UNLOCKED';
+          document.getElementById('hubBadge').className = 'text-[10px] font-black bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full';
+          document.getElementById('hubCountdown').innerText = 'Eligible for Payout';
+          document.getElementById('claimHelpText').innerText = 'Congratulations! All 6 claims completed. Your wallet balance is now fully unlocked for withdrawal.';
+          btn.disabled = true;
+          btn.className = 'w-full sm:w-auto bg-emerald-600 text-white font-black px-6 py-3 rounded-2xl text-xs shadow-md';
+          btn.innerHTML = '<span>✓</span> 6/6 Days Completed (Ready to Withdraw)';
+        } else {
+          document.getElementById('hubTitle').innerText = '6-Day Daily 18% Claim Window';
+          document.getElementById('hubBadge').innerText = 'STAGE 2';
+          document.getElementById('hubBadge').className = 'text-[10px] font-black bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full';
+          document.getElementById('hubCountdown').innerText = `Claim ${count + 1} of 6`;
+
+          if (data.canClaimNow) {
+            document.getElementById('claimHelpText').innerText = `Daily 18% claim is ready! Click below to collect ₹${data.daily18Rate.toLocaleString()}.`;
+            btn.disabled = false;
+            btn.className = 'w-full sm:w-auto btn-pollpe-purple font-black px-6 py-3 rounded-2xl text-xs shadow-md';
+            btn.innerHTML = `<span>🎁</span> Claim Day ${count + 1} (18% Yield)`;
+          } else {
+            const hoursLeft = Math.max(0, Math.ceil((data.nextClaimTime - Date.now()) / (1000 * 60 * 60)));
+            document.getElementById('claimHelpText').innerText = `Next 18% claim unlocks in ${hoursLeft} hours.`;
+            btn.disabled = true;
+            btn.className = 'w-full sm:w-auto bg-slate-200 text-slate-400 font-black px-6 py-3 rounded-2xl text-xs cursor-not-allowed';
+            btn.innerHTML = `<span>⏱️</span> Next Claim in ${hoursLeft}h`;
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function submitDaily18Claim() {
+      try {
+        const res = await fetch('/api/user/claim-daily-18', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentUser.email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message);
+          currentUser.balance = data.balance;
+          document.getElementById('userBalance').innerText = `₹${currentUser.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+          updateYieldLifecycle();
+        } else {
+          alert(data.error);
+        }
+      } catch (e) {
+        alert('Server connection error.');
+      }
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await fetch(`/api/user/transactions?email=${encodeURIComponent(currentUser.email)}`);
+        const data = await res.json();
+        if (data.success) {
+          rawTransactions = data.transactions;
+          document.getElementById('histDep1Year').innerText = `₹${data.summary.deposit1Year.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+          document.getElementById('histWth1Year').innerText = `₹${data.summary.withdraw1Year.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+          document.getElementById('histNet1Year').innerText = `₹${data.summary.net1Year.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+          filterHistoryDisplay();
+        }
+      } catch (e) {}
+    }
+
+    function filterHistoryDisplay() {
+      const type = document.getElementById('historyTypeFilter').value;
+      const range = document.getElementById('historyRangeFilter').value;
+      const now = Date.now();
+
+      let filtered = [...rawTransactions];
+      if (type !== 'ALL') filtered = filtered.filter(t => t.type === type);
+      if (range === '365') filtered = filtered.filter(t => t.timestamp >= now - (365 * 24 * 60 * 60 * 1000));
+      else if (range === '30') filtered = filtered.filter(t => t.timestamp >= now - (30 * 24 * 60 * 60 * 1000));
+
+      const rows = document.getElementById('historyRows');
+      if (filtered.length === 0) {
+        rows.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 font-bold">No transactions recorded in this period.</td></tr>`;
+        return;
+      }
+
+      rows.innerHTML = filtered.map(t => {
+        const isDep = t.type === 'DEPOSIT';
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="p-3.5"><span class="inline-flex items-center gap-1.5 font-black text-xs ${isDep ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50'} px-2.5 py-1 rounded-xl">${isDep ? '📥 Deposit' : '📤 Withdrawal'}</span></td>
+            <td class="p-3.5 font-mono font-bold text-slate-800">${t.refNumber || t.id}</td>
+            <td class="p-3.5 text-slate-500 font-semibold">${t.method || 'System Route'}</td>
+            <td class="p-3.5 font-black font-mono text-sm ${isDep ? 'text-emerald-600' : 'text-rose-600'}">${isDep ? '+' : '-'}₹${t.amount.toLocaleString()}</td>
+            <td class="p-3.5"><span class="text-[10px] font-black px-2.5 py-0.5 rounded-full ${t.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' : (t.status === 'PENDING' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')}">${t.status}</span></td>
+            <td class="p-3.5 text-[11px] text-slate-400 font-medium">${t.date}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function loadSubscriptions() {
+      const box = document.getElementById('subscriptionsList');
+      const plans = currentUser.activePlans || [];
+      if (plans.length === 0) {
+        box.innerHTML = `<div class="p-6 text-center text-slate-400 font-bold">No active plans yet.</div>`;
+        return;
+      }
+      box.innerHTML = plans.map(p => `
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex justify-between items-center text-xs">
+          <div><span class="font-black text-slate-900">${p.title}</span><div class="text-slate-500 mt-0.5">Capital: ₹${p.amount.toLocaleString()} • Yield: +₹${p.dailyIncome}</div></div>
+          <span class="bg-emerald-100 text-emerald-700 font-black px-2.5 py-0.5 rounded-full">Active</span>
+        </div>
+      `).join('');
+    }
+
+    async function loadActivity() {
+      const res = await fetch(`/api/user/activity?email=${encodeURIComponent(currentUser.email)}`);
+      const data = await res.json();
+      const list = document.getElementById('activityLogsList');
+      list.innerHTML = (data.logs || []).map(l => `
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex justify-between text-xs">
+          <span class="font-bold text-slate-800">${l.action}</span><span class="text-slate-400">${l.date} • ${l.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function openTaskModal() { document.getElementById('taskModal').classList.remove('hidden'); }
+    function closeTaskModal() { document.getElementById('taskModal').classList.add('hidden'); }
+    function copyReferralLink() { navigator.clipboard.writeText(document.getElementById('taskRefLink').value); alert('Invite link copied! 📋'); }
+
+    async function handleSaveUpi() {
+      const upiId = document.getElementById('bindUpiId').value.trim();
+      const bankName = document.getElementById('bindBankName').value.trim();
+      const accountNumber = document.getElementById('bindAccNumber').value.trim();
+      const ifsc = document.getElementById('bindIfsc').value.trim();
+
+      const res = await fetch('/api/user/add-upi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: currentUser.email, upiId, bankName, accountNumber, ifsc }) });
       const data = await res.json();
       alert(data.message || data.error);
-      loadAdminData();
-    } catch (e) {
-      alert('Failed to process UTR');
     }
-  }
 
-  function handleLogout() {
-    localStorage.removeItem('acpay_token');
-    token = null;
-    switchView('login');
-  }
+    async function handleRequestWithdraw() {
+      const amount = document.getElementById('withdrawAmount').value;
+      const paymentMethod = document.getElementById('withdrawMethod').value;
 
-  // Maintain session on load
-  if (token) {
-    switchView('dashboard');
-  }
-</script>
+      const res = await fetch('/api/user/withdraw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: currentUser.email, amount, paymentMethod }) });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        currentUser.balance = data.balance;
+        document.getElementById('userBalance').innerText = `₹${currentUser.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        loadHistory();
+      } else alert(data.error);
+    }
 
+    function toggleChatWindow() {
+      const win = document.getElementById('chatWindow');
+      win.classList.toggle('hidden');
+      if (!win.classList.contains('hidden')) fetchChatHistory();
+    }
+
+    async function fetchChatHistory() {
+      if (!currentUser) return;
+      try {
+        const res = await fetch(`/api/chat/history?email=${encodeURIComponent(currentUser.email)}`);
+        const data = await res.json();
+        if (data.success) {
+          const area = document.getElementById('chatMessages');
+          area.innerHTML = data.messages.map(m => `
+            <div class="flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}">
+              <div class="${m.sender === 'user' ? 'bg-purple-600 text-white' : 'bg-white text-slate-800 border border-slate-200'} p-3 rounded-2xl max-w-[80%]">${m.text}</div>
+              <span class="text-[9px] text-slate-400 mt-0.5">${m.time}</span>
+            </div>
+          `).join('');
+        }
+      } catch (e) {}
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text || !currentUser) return;
+      input.value = '';
+      await fetch('/api/chat/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: currentUser.email, text, sender: 'user' }) });
+      fetchChatHistory();
+    }
+
+    function switchTab(tab) {
+      ['plans', 'history', 'subscriptions', 'activity', 'upi', 'withdraw'].forEach(t => {
+        const el = document.getElementById(`view${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (el) el.classList.add('hidden');
+        if (btn) btn.className = 'bg-white hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-2xl font-black border border-slate-200 flex items-center gap-2 transition shadow-sm';
+      });
+
+      const activeEl = document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+      const activeBtn = document.getElementById(`btnTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+      if (activeBtn) activeBtn.className = 'tab-pill-active px-5 py-2.5 rounded-2xl font-black flex items-center gap-2 transition';
+
+      if (tab === 'history') loadHistory();
+      if (tab === 'subscriptions') loadSubscriptions();
+      if (tab === 'activity') loadActivity();
+    }
+  </script>
 </body>
 </html>

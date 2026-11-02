@@ -3,355 +3,686 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ACPay Master Admin Console</title>
+  <title>ACPay - Master Admin Command Terminal</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+    .admin-card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02); border-radius: 24px; }
+    .btn-purple { background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%); color: #ffffff; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3); transition: all 0.2s ease; }
+    .btn-purple:hover { background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%); transform: translateY(-1px); }
+    .btn-emerald { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25); }
+    .btn-emerald:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-1px); }
+    .sound-badge-active { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
   </style>
 </head>
-<body class="bg-[#0b0e14] text-slate-300 min-h-screen flex selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen p-4 md:p-8 relative">
 
-  <!-- Sidebar Navigation -->
-  <aside class="w-64 bg-[#0f1523] border-r border-slate-800 flex flex-col flex-shrink-0 min-h-screen text-xs select-none">
-    <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-      <div>
-        <h1 class="text-base font-extrabold text-white tracking-wide">ACPay Admin</h1>
-        <span class="text-[10px] text-indigo-400 font-mono">Master System</span>
+  <!-- ADMIN PIN LOCK -->
+  <div id="adminAuthLock" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl border border-slate-200 text-center space-y-6">
+      <div class="w-16 h-16 mx-auto rounded-3xl bg-purple-100 text-purple-600 flex items-center justify-center text-3xl"><i class="fa-solid fa-user-shield"></i></div>
+      <div><h2 class="text-xl font-black text-slate-900">Master Admin Security Lock</h2><p class="text-xs text-slate-500 font-semibold mt-1">Authorized owner access only.</p></div>
+      <div class="space-y-4 text-left text-xs font-bold">
+        <div><label class="block text-slate-600 mb-1">Owner Gmail</label><input type="email" id="adminAuthEmail" value="althaf97hussain01@gmail.com" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-slate-800"></div>
+        <div><label class="block text-slate-600 mb-1">Master PIN</label><input type="password" id="adminAuthPin" placeholder="••••" maxlength="6" class="w-full text-center tracking-[12px] font-black text-lg bg-slate-50 border border-slate-300 rounded-2xl px-4 py-2.5 text-slate-900"></div>
+        <button onclick="unlockAdminAccess()" class="w-full btn-purple font-black py-3.5 rounded-2xl text-xs uppercase tracking-wider mt-2 shadow-lg">Unlock Master Dashboard</button>
       </div>
-      <a href="/" target="_blank" class="text-slate-500 hover:text-white" title="Launch Platform"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+      <p class="text-[11px] text-slate-400">Default PIN: <code class="font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">8899</code></p>
     </div>
+  </div>
 
-    <nav class="flex-1 p-3 space-y-1">
-      <button onclick="switchView('users')" id="nav-users" class="w-full text-left py-2.5 px-3 rounded-xl bg-indigo-600/20 text-indigo-400 font-bold flex items-center gap-2.5">
-        <i class="fa-solid fa-users"></i> Users & Points Control
-      </button>
-      <button onclick="switchView('utrs')" id="nav-utrs" class="w-full text-left py-2.5 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/40 font-bold flex items-center gap-2.5">
-        <i class="fa-solid fa-receipt"></i> Check User UTR Slips
-      </button>
-      <button onclick="switchView('scanners')" id="nav-scanners" class="w-full text-left py-2.5 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/40 font-bold flex items-center gap-2.5">
-        <i class="fa-solid fa-qrcode"></i> Update Two Scanners (JSON)
-      </button>
-      <button onclick="switchView('withdrawals')" id="nav-withdrawals" class="w-full text-left py-2.5 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/40 font-bold flex items-center gap-2.5">
-        <i class="fa-solid fa-money-bill-transfer"></i> 24h Withdrawals Queue
-      </button>
-    </nav>
-  </aside>
-
-  <!-- Main Workspace -->
-  <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-    <header class="h-14 bg-[#0f1523] border-b border-slate-800 px-6 flex items-center justify-between text-xs">
-      <span id="view-title" class="font-extrabold text-white uppercase tracking-wider">User Account Management</span>
-      <button onclick="loadData()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">
-        <i class="fa-solid fa-rotate mr-1"></i> Refresh Data
-      </button>
+  <!-- ADMIN WORKSPACE -->
+  <div id="adminContent" class="max-w-7xl mx-auto space-y-8">
+    <header class="admin-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-md">👑</div>
+        <div>
+          <h1 class="text-xl font-black text-slate-900">ACPay Master Command Center</h1>
+          <p class="text-xs text-slate-500 font-semibold">Live Audit Ledgers • Audio Alerts • Gallery QR Scanner Manager • Slip Verifier</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="btnSoundToggle" onclick="toggleAudioNotifications()" class="sound-badge-active px-3.5 py-2 rounded-2xl text-xs font-black flex items-center gap-2"><i id="soundIcon" class="fa-solid fa-volume-high text-emerald-600"></i><span id="soundText">Sound: ON</span></button>
+        <button onclick="refreshData()" class="btn-purple px-4 py-2 rounded-2xl text-xs font-black flex items-center gap-2"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+        <button onclick="lockAdminSession()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-2 rounded-2xl text-xs font-black"><i class="fa-solid fa-lock"></i></button>
+      </div>
     </header>
 
-    <div class="flex-1 overflow-y-auto p-6 space-y-6">
-      
-      <!-- VIEW A: USERS -->
-      <section id="sec-users" class="space-y-4">
-        <div class="bg-[#131929] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr class="bg-[#0b0e14] text-slate-400 border-b border-slate-800 uppercase font-semibold text-[11px]">
-                <th class="p-3.5">User Gmail / UID</th>
-                <th class="p-3.5">Bound Accounts</th>
-                <th class="p-3.5 text-right">Balance</th>
-                <th class="p-3.5 text-right">Today Earn</th>
-                <th class="p-3.5 text-center">Modify Points</th>
-              </tr>
-            </thead>
-            <tbody id="user-rows" class="divide-y divide-slate-800 font-mono"></tbody>
-          </table>
-        </div>
-      </section>
+    <div id="liveAlertBanner" class="hidden p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 flex justify-between items-center shadow-lg">
+      <div class="flex items-center gap-3"><span class="text-2xl">🔔</span><div><h4 id="alertTitle" class="font-black text-sm">Alert!</h4><p id="alertBody" class="text-xs text-amber-800">New user action detected.</p></div></div>
+      <button onclick="dismissAlert()" class="text-amber-800 hover:text-black text-sm font-black px-3 py-1">Dismiss</button>
+    </div>
 
-      <!-- VIEW B: CHECK UTR SLIPS -->
-      <section id="sec-utrs" class="hidden space-y-4">
-        <div class="bg-[#131929] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr class="bg-[#0b0e14] text-slate-400 border-b border-slate-800 uppercase font-semibold text-[11px]">
-                <th class="p-3.5">Slip ID / Date</th>
-                <th class="p-3.5">User Gmail</th>
-                <th class="p-3.5">Scanner Used</th>
-                <th class="p-3.5">12-Digit UTR Ref</th>
-                <th class="p-3.5 text-right">Amount</th>
-                <th class="p-3.5 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody id="utr-rows" class="divide-y divide-slate-800 font-mono"></tbody>
-          </table>
+    <!-- ======================================================== -->
+    <!-- GALLERY QR SCANNER & BANK MANAGER                        -->
+    <!-- ======================================================== -->
+    <div class="admin-card p-6 md:p-8 space-y-6 border-2 border-indigo-100 shadow-sm">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-100 pb-4">
+        <div>
+          <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+            <span>⚡</span> Gallery QR Scanner & Bank Account Manager
+          </h2>
+          <p class="text-xs text-slate-500 font-semibold mt-0.5">
+            Click <strong>"Upload QR from Gallery"</strong> on any scanner to select your original scanner photo. Click <strong>"Add New Scanner"</strong> for a blank scanner card.
+          </p>
         </div>
-      </section>
 
-      <!-- VIEW C: UPDATE TWO SCANNERS (scanners_config.json) -->
-      <section id="sec-scanners" class="hidden space-y-6">
-        <div class="flex justify-between items-center bg-[#131929] p-4 rounded-2xl border border-slate-800">
-          <div>
-            <h3 class="text-sm font-bold text-white uppercase">Update Scanners & Bank Details</h3>
-            <p class="text-xs text-slate-400">Modifies scanners_config.json time-to-time without server restarts.</p>
-          </div>
-          <button onclick="commitScannerChanges()" class="bg-[#6440fe] hover:bg-[#522fe6] text-white px-5 py-2.5 rounded-xl font-bold text-xs transition">
-            Save All Changes
+        <div class="flex items-center gap-3">
+          <button onclick="addNewScannerCard()" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-4 py-2.5 rounded-2xl text-xs font-black flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-plus text-sm"></i>
+            <span>Add New Scanner</span>
+          </button>
+          
+          <button onclick="saveDynamicScanners()" class="btn-emerald px-5 py-2.5 rounded-2xl text-xs font-black shadow-md flex items-center gap-2">
+            <i class="fa-solid fa-floppy-disk text-sm"></i>
+            <span>Save All Changes</span>
           </button>
         </div>
+      </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-          <!-- Scanner 1 -->
-          <div class="bg-[#131929] border border-slate-800 rounded-2xl p-5 space-y-3">
-            <h4 class="font-bold text-indigo-400 uppercase border-b border-slate-800 pb-2">Scanner 1 (Primary)</h4>
-            <div>
-              <label class="block text-slate-400 mb-1">Title</label>
-              <input id="s1-title" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-white rounded-xl p-2.5 outline-none">
-            </div>
-            <div>
-              <label class="block text-slate-400 mb-1">UPI VPA</label>
-              <input id="s1-vpa" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-emerald-400 font-mono font-bold rounded-xl p-2.5 outline-none">
-            </div>
-            <div>
-              <label class="block text-slate-400 mb-1">Account Holder Name</label>
-              <input id="s1-name" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-white rounded-xl p-2.5 outline-none">
-            </div>
+      <!-- Scanners Container -->
+      <div>
+        <h3 class="text-xs font-black text-slate-500 uppercase tracking-wider mb-3">Active UPI Scanners</h3>
+        <div id="dynamicScannersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </div>
+
+      <!-- Bank Details -->
+      <div class="pt-4 border-t border-slate-100">
+        <h3 class="text-xs font-black text-emerald-800 uppercase tracking-wider mb-3">Company Settlement Bank Account</h3>
+        <div class="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-bold">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">Bank Name</label>
+            <input type="text" id="m_bk_name" placeholder="State Bank of India" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:border-emerald-600 focus:outline-none">
           </div>
-
-          <!-- Scanner 2 -->
-          <div class="bg-[#131929] border border-slate-800 rounded-2xl p-5 space-y-3">
-            <h4 class="font-bold text-amber-400 uppercase border-b border-slate-800 pb-2">Scanner 2 (Backup)</h4>
-            <div>
-              <label class="block text-slate-400 mb-1">Title</label>
-              <input id="s2-title" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-white rounded-xl p-2.5 outline-none">
-            </div>
-            <div>
-              <label class="block text-slate-400 mb-1">UPI VPA</label>
-              <input id="s2-vpa" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-emerald-400 font-mono font-bold rounded-xl p-2.5 outline-none">
-            </div>
-            <div>
-              <label class="block text-slate-400 mb-1">Account Holder Name</label>
-              <input id="s2-name" type="text" class="w-full bg-[#0b0e14] border border-slate-700 text-white rounded-xl p-2.5 outline-none">
-            </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">Account Holder Name</label>
+            <input type="text" id="m_bk_holder" placeholder="Althaf Hussain" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:border-emerald-600 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">Account Number</label>
+            <input type="text" id="m_bk_acc" placeholder="42971394203" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 font-mono font-black text-slate-800 focus:border-emerald-600 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">IFSC Code</label>
+            <input type="text" id="m_bk_ifsc" placeholder="SBIN0000977" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 font-mono font-black uppercase text-slate-800 focus:border-emerald-600 focus:outline-none">
           </div>
         </div>
-      </section>
-
-      <!-- VIEW D: WITHDRAWALS -->
-      <section id="sec-withdrawals" class="hidden space-y-4">
-        <div class="bg-[#131929] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr class="bg-[#0b0e14] text-slate-400 border-b border-slate-800 uppercase font-semibold text-[11px]">
-                <th class="p-3.5">ID / Date</th>
-                <th class="p-3.5">User</th>
-                <th class="p-3.5">Destination Account</th>
-                <th class="p-3.5 text-right">Amount</th>
-                <th class="p-3.5 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody id="withdrawal-rows" class="divide-y divide-slate-800 font-mono"></tbody>
-          </table>
-        </div>
-      </section>
-
+      </div>
     </div>
-  </main>
+
+    <!-- PENDING 12-DIGIT UTR SLIPS & SCREENSHOT AUDIT QUEUE -->
+    <div class="admin-card p-6 space-y-4 border-2 border-purple-200/80 shadow-md">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+        <div>
+          <h2 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span>🔍</span> Pending 12-Digit UTR Slips & Receipt Screenshot Verifier
+          </h2>
+          <p class="text-xs text-slate-500 font-bold">Inspect user-uploaded payment screenshots to prevent fake UTR numbers before approving deposits.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-100 text-slate-500 font-black uppercase text-[10px]">
+            <tr>
+              <th class="p-4">Slip ID</th>
+              <th class="p-4">User Email</th>
+              <th class="p-4">12-Digit UTR</th>
+              <th class="p-4">Amount</th>
+              <th class="p-4">Receipt Screenshot</th>
+              <th class="p-4">Route Used</th>
+              <th class="p-4">Action</th>
+            </tr>
+          </thead>
+          <tbody id="utrRows" class="divide-y divide-slate-100 bg-white font-medium"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3-DAY & 6-DAY CLAIM STATUS MONITOR -->
+    <div class="admin-card p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+        <div>
+          <h2 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span>⏱️</span> User 3-Day Referral & 6-Day Claim Monitor
+          </h2>
+          <p class="text-xs text-slate-400 font-bold">Live tracking of 72-hour referral window expiration and daily 18% claims completed.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-100 text-slate-500 font-black uppercase text-[10px]">
+            <tr>
+              <th class="p-4">User Email / UID</th>
+              <th class="p-4">Current Stage</th>
+              <th class="p-4">Progress</th>
+            </tr>
+          </thead>
+          <tbody id="claimStatusRows" class="divide-y divide-slate-100 bg-white font-medium"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ALL-USERS 1-YEAR DEPOSIT & WITHDRAWAL AUDIT -->
+    <div class="admin-card p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+        <div>
+          <h2 class="text-base font-black text-slate-900 flex items-center gap-2"><span>📊</span> All Users: 1-Year Financial Audit Ledger</h2>
+          <p class="text-xs text-slate-400 font-bold">Real-time aggregate totals of how much each user has deposited & withdrawn over the last 365 days.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-100 text-slate-500 font-black uppercase text-[10px]">
+            <tr>
+              <th class="p-4">User Email / UID</th>
+              <th class="p-4">Current Balance</th>
+              <th class="p-4">Deposited (Last 1 Year)</th>
+              <th class="p-4">Withdrawn (Last 1 Year)</th>
+              <th class="p-4">Net Position</th>
+              <th class="p-4">Active Plans</th>
+              <th class="p-4">Inspect User History</th>
+            </tr>
+          </thead>
+          <tbody id="allUsersLedgerRows" class="divide-y divide-slate-100 bg-white font-medium"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SUPPORT CHAT INBOX -->
+    <div class="admin-card p-6 space-y-4">
+      <h2 class="text-base font-black text-slate-900 flex items-center gap-2"><span>💬</span> Support Inquiries Desk</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 h-96">
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 overflow-y-auto space-y-2" id="chatThreadsList"></div>
+        <div class="md:col-span-2 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between overflow-hidden">
+          <div class="bg-white p-3.5 border-b border-slate-200 font-black text-xs text-slate-800" id="activeChatUser">Select user</div>
+          <div id="adminChatMessages" class="flex-1 p-4 overflow-y-auto space-y-2 text-xs"></div>
+          <div class="p-3 bg-white border-t border-slate-200 flex gap-2">
+            <input type="text" id="adminReplyInput" onkeydown="if(event.key==='Enter') sendAdminReply()" placeholder="Type reply..." class="flex-1 bg-slate-50 border border-slate-200 text-xs text-slate-900 rounded-2xl px-4 py-2.5 focus:outline-none">
+            <button onclick="sendAdminReply()" class="btn-purple px-5 py-2.5 rounded-2xl text-xs font-black">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING WITHDRAWALS -->
+    <div class="admin-card p-6 space-y-4">
+      <h2 class="text-base font-black text-slate-900">Pending Withdrawal Clearances</h2>
+      <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-100 text-slate-500 font-black uppercase text-[10px]">
+            <tr><th class="p-4">ID</th><th class="p-4">User</th><th class="p-4">Amount</th><th class="p-4">Destination</th><th class="p-4">Action</th></tr>
+          </thead>
+          <tbody id="withdrawalRows" class="divide-y divide-slate-100 bg-white font-medium"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- POINTS CONTROL -->
+    <div class="admin-card p-6 space-y-4">
+      <h2 class="text-base font-black text-slate-900">Points Control</h2>
+      <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-100 text-slate-500 font-black uppercase text-[10px]">
+            <tr><th class="p-4">User</th><th class="p-4">Balance</th><th class="p-4">Action</th></tr>
+          </thead>
+          <tbody id="userRows" class="divide-y divide-slate-100 bg-white font-medium"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREENSHOT AUDIT MODAL -->
+  <div id="screenshotModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="max-w-xl w-full bg-white rounded-3xl p-6 relative space-y-4 shadow-2xl border border-slate-200">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-black text-slate-900 text-base" id="modalSlipUser">Receipt Screenshot Verification</h3>
+          <p class="text-xs text-slate-500 font-mono" id="modalSlipUtr">UTR: Loading...</p>
+        </div>
+        <button onclick="closeScreenshotModal()" class="text-slate-400 hover:text-slate-800 text-xl font-bold p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="bg-slate-950 p-2 rounded-2xl text-center max-h-[460px] overflow-auto flex items-center justify-center">
+        <img id="modalSlipImg" src="" alt="Payment Receipt" class="max-h-[440px] w-auto rounded-xl object-contain shadow-md">
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button onclick="closeScreenshotModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2.5 rounded-xl text-xs transition">
+          Close Preview
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    async function loadData() {
-      loadAdminUsers();
-      loadUtrSlips();
-      loadScannersConfig();
-      loadWithdrawals();
+    let soundEnabled = true;
+    let selectedThreadEmail = null;
+    let audioCtx = null;
+    let prevUtrCount = null;
+    let prevWithdrawalCount = null;
+    let prevChatMsgCount = 0;
+    let currentScannersList = [];
+    let currentUtrSlips = [];
+
+    window.onload = () => {
+      if (localStorage.getItem('acpay_admin_token')) {
+        document.getElementById('adminAuthLock').classList.add('hidden');
+        refreshData();
+        loadAdminScannersManager();
+      }
+    };
+
+    async function unlockAdminAccess() {
+      const email = document.getElementById('adminAuthEmail').value.trim();
+      const pin = document.getElementById('adminAuthPin').value.trim();
+      const res = await fetch('/api/admin/verify-access', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, pin }) });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem('acpay_admin_token', data.token);
+        document.getElementById('adminAuthLock').classList.add('hidden');
+        refreshData();
+        loadAdminScannersManager();
+      } else alert(data.error);
     }
 
-    async function loadAdminUsers() {
-      const res = await fetch('/api/admin/all-users');
-      const data = await res.json();
-      const tbody = document.getElementById('user-rows');
-      tbody.innerHTML = '';
+    function lockAdminSession() {
+      localStorage.removeItem('acpay_admin_token');
+      document.getElementById('adminAuthLock').classList.remove('hidden');
+    }
 
-      if (!data.users || data.users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">No registered users yet.</td></tr>';
+    function playAlertSound(type = 'deposit') {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        osc.frequency.setValueAtTime(type === 'deposit' ? 880 : 659.25, now);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } catch (e) {}
+    }
+
+    function toggleAudioNotifications() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundText').innerText = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
+    }
+
+    function triggerAlert(title, message, soundType) {
+      playAlertSound(soundType);
+      const b = document.getElementById('liveAlertBanner');
+      document.getElementById('alertTitle').innerText = title;
+      document.getElementById('alertBody').innerText = message;
+      b.classList.remove('hidden');
+    }
+
+    function dismissAlert() { document.getElementById('liveAlertBanner').classList.add('hidden'); }
+
+    // DYNAMIC SCANNER & GALLERY CONTROLS
+    async function loadAdminScannersManager() {
+      try {
+        const res = await fetch('/api/scanners/config');
+        const data = await res.json();
+        if (data.success && data.config) {
+          currentScannersList = data.config.scanners || [];
+          renderAdminScanners();
+
+          const bk = data.config.companyBank || {};
+          document.getElementById('m_bk_name').value = bk.bankName || 'State Bank of India';
+          document.getElementById('m_bk_holder').value = bk.accountHolder || 'Althaf Hussain';
+          document.getElementById('m_bk_acc').value = bk.accountNumber || '42971394203';
+          document.getElementById('m_bk_ifsc').value = bk.ifsc || 'SBIN0000977';
+        }
+      } catch (e) {
+        console.error('Failed to load scanners:', e);
+      }
+    }
+
+    function renderAdminScanners() {
+      const container = document.getElementById('dynamicScannersList');
+      if (currentScannersList.length === 0) {
+        container.innerHTML = `<div class="col-span-full p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-400 font-bold text-sm">No scanners active. Click "+ Add New Scanner" to create one.</div>`;
         return;
       }
 
-      data.users.forEach(u => {
-        const upiListText = (u.upiList && u.upiList.length > 0)
-          ? u.upiList.map(a => `${a.bankName}: ${a.upiId}`).join(', ')
-          : '<span class="text-slate-500 italic">No account bound</span>';
+      container.innerHTML = currentScannersList.map((sc, index) => {
+        const displayImg = sc.customQrImage 
+          ? sc.customQrImage 
+          : `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=${sc.upiVpa || 'test@upi'}&pn=${sc.accountName || 'Merchant'}`)}`;
 
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-800/30';
-        tr.innerHTML = `
-          <td class="p-3.5">
-            <span class="text-white font-sans font-bold block">${u.email}</span>
-            <span class="text-[11px] text-slate-500 font-sans">UID: ${u.uid} | Ref: ${u.myReferralCode}</span>
-          </td>
-          <td class="p-3.5 font-sans text-indigo-400 text-xs">${upiListText}</td>
-          <td class="p-3.5 text-right text-emerald-400 font-bold text-sm">₹${Number(u.balance).toFixed(2)}</td>
-          <td class="p-3.5 text-right text-slate-300 font-bold">₹${Number(u.todayEarn).toFixed(2)}</td>
-          <td class="p-3.5 text-center space-x-2 font-sans">
-            <button onclick="editPoints('${u.email}', ${u.balance}, ${u.todayEarn})" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/30 px-2.5 py-1 rounded text-xs transition">
-              Adjust Points
-            </button>
-          </td>
+        return `
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3.5 relative" id="scan_card_${index}">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-purple-700 uppercase tracking-wide">Scanner #${index + 1}</span>
+              <button onclick="deleteScannerCard(${index})" class="text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1" title="Delete Scanner">
+                <i class="fa-solid fa-trash-can"></i> Delete
+              </button>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">UPI Address (VPA)</label>
+              <input type="text" oninput="updateScannerPreview(${index})" id="vpa_${index}" value="${sc.upiVpa || ''}" placeholder="e.g. name@upi" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:border-purple-600 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">Account / Merchant Name</label>
+              <input type="text" oninput="updateScannerPreview(${index})" id="name_${index}" value="${sc.accountName || ''}" placeholder="e.g. Rahul Sharma" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-purple-600 focus:outline-none">
+            </div>
+
+            <!-- Upload from Gallery button & hidden file input -->
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">Scanner QR Image (From Gallery)</label>
+              <input type="file" id="gallery_file_${index}" accept="image/*" onchange="handleGalleryUpload(${index}, event)" class="hidden">
+              <button type="button" onclick="document.getElementById('gallery_file_${index}').click()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+                <i class="fa-regular fa-image"></i>
+                <span>📁 Upload QR from Gallery</span>
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] text-slate-400 font-bold block">Current QR Preview</span>
+                ${sc.customQrImage ? '<span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Gallery Image</span>' : '<span class="text-[9px] font-bold text-slate-400">Generated</span>'}
+              </div>
+              <div class="bg-white p-2 rounded-xl border border-slate-200 text-center">
+                <img id="qr_img_${index}" src="${displayImg}" alt="QR" class="w-28 h-28 mx-auto object-contain rounded-lg">
+              </div>
+            </div>
+          </div>
         `;
-        tbody.appendChild(tr);
-      });
+      }).join('');
     }
 
-    async function loadUtrSlips() {
-      const res = await fetch('/api/admin/utr-slips');
-      const data = await res.json();
-      const tbody = document.getElementById('utr-rows');
-      tbody.innerHTML = '';
+    // Handles picking image directly from phone/laptop gallery
+    function handleGalleryUpload(index, event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
 
-      if (!data.slips || data.slips.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">No pending UTR slips.</td></tr>';
-        return;
-      }
-
-      data.slips.forEach(s => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-800/30';
-        tr.innerHTML = `
-          <td class="p-3.5 text-slate-400 text-[11px]">${s.id}<br>${s.date}</td>
-          <td class="p-3.5 font-bold text-white font-sans">${s.email}</td>
-          <td class="p-3.5 text-indigo-400 font-sans">${s.scannerUsed}</td>
-          <td class="p-3.5 text-amber-300 font-bold text-sm tracking-wider">${s.utr}</td>
-          <td class="p-3.5 text-right font-bold text-emerald-400 text-sm">₹${Number(s.amount).toFixed(2)}</td>
-          <td class="p-3.5 text-center space-x-2 font-sans">
-            <button onclick="resolveUtr('${s.id}', 'approve')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded text-xs font-bold">Approve</button>
-            <button onclick="resolveUtr('${s.id}', 'reject')" class="bg-rose-600 hover:bg-rose-500 text-white px-2.5 py-1 rounded text-xs font-bold">Reject</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Data = e.target.result;
+        currentScannersList[index].customQrImage = base64Data;
+        const img = document.getElementById(`qr_img_${index}`);
+        if (img) img.src = base64Data;
+        renderAdminScanners();
+      };
+      reader.readAsDataURL(file);
     }
 
-    async function resolveUtr(id, action) {
-      await fetch('/api/admin/resolve-utr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, action })
+    // Creates a fresh blank scanner card
+    function addNewScannerCard() {
+      syncInputsToState();
+      currentScannersList.push({ 
+        id: `scan_${Date.now()}`, 
+        title: "New Scanner", 
+        upiVpa: "", 
+        accountName: "",
+        customQrImage: ""
       });
-      loadData();
+      renderAdminScanners();
     }
 
-    async function loadScannersConfig() {
-      const res = await fetch('/api/scanners/config');
-      const data = await res.json();
-      if (data.success && data.config) {
-        const c = data.config;
-        document.getElementById('s1-title').value = c.scanner1.title;
-        document.getElementById('s1-vpa').value = c.scanner1.upiVpa;
-        document.getElementById('s1-name').value = c.scanner1.accountName;
-
-        document.getElementById('s2-title').value = c.scanner2.title;
-        document.getElementById('s2-vpa').value = c.scanner2.upiVpa;
-        document.getElementById('s2-name').value = c.scanner2.accountName;
+    function deleteScannerCard(index) {
+      if (confirm(`Are you sure you want to delete Scanner #${index + 1}?`)) {
+        syncInputsToState();
+        currentScannersList.splice(index, 1);
+        renderAdminScanners();
       }
     }
 
-    async function commitScannerChanges() {
+    function updateScannerPreview(index) {
+      const vpa = document.getElementById(`vpa_${index}`).value.trim();
+      const name = document.getElementById(`name_${index}`).value.trim();
+      
+      // If user hasn't uploaded a gallery screenshot, update generated QR code
+      if (!currentScannersList[index].customQrImage) {
+        const img = document.getElementById(`qr_img_${index}`);
+        if (img) {
+          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=${vpa}&pn=${name}`)}`;
+        }
+      }
+    }
+
+    function syncInputsToState() {
+      currentScannersList.forEach((sc, i) => {
+        const vpaEl = document.getElementById(`vpa_${i}`);
+        const nameEl = document.getElementById(`name_${i}`);
+        if (vpaEl) sc.upiVpa = vpaEl.value.trim();
+        if (nameEl) sc.accountName = nameEl.value.trim();
+      });
+    }
+
+    async function saveDynamicScanners() {
+      syncInputsToState();
       const payload = {
-        scanner1: {
-          title: document.getElementById('s1-title').value.trim(),
-          upiVpa: document.getElementById('s1-vpa').value.trim(),
-          accountName: document.getElementById('s1-name').value.trim(),
-          image: ""
-        },
-        scanner2: {
-          title: document.getElementById('s2-title').value.trim(),
-          upiVpa: document.getElementById('s2-vpa').value.trim(),
-          accountName: document.getElementById('s2-name').value.trim(),
-          image: ""
-        },
+        scanners: currentScannersList,
         companyBank: {
-          bankName: "State Bank of India",
-          accountHolder: "Althaf Hussain",
-          accountNumber: "42971394203",
-          ifsc: "SBIN0000977"
+          bankName: document.getElementById('m_bk_name').value.trim(),
+          accountHolder: document.getElementById('m_bk_holder').value.trim(),
+          accountNumber: document.getElementById('m_bk_acc').value.trim(),
+          ifsc: document.getElementById('m_bk_ifsc').value.trim().toUpperCase()
         }
       };
 
-      const res = await fetch('/api/admin/update-scanners', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('Both scanners updated in scanners_config.json!');
+      try {
+        const res = await fetch('/api/admin/update-scanners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (data.success) {
+          alert('✅ Updated! Changes and gallery images are live on payment.html.');
+          loadAdminScannersManager();
+        } else alert(data.error || 'Failed to update scanners.');
+      } catch (e) {
+        alert('Server connection error.');
       }
     }
 
-    async function loadWithdrawals() {
-      const res = await fetch('/api/admin/withdrawals');
+    // SCREENSHOT INSPECTION MODAL
+    function viewSlipScreenshot(slipId) {
+      const slip = currentUtrSlips.find(s => s.id === slipId);
+      if (!slip || !slip.screenshot) return alert('No screenshot slip attached to this transaction.');
+
+      document.getElementById('modalSlipUser').innerText = `Receipt Slip: ${slip.email}`;
+      document.getElementById('modalSlipUtr').innerText = `12-Digit UTR: ${slip.utr} • Amount: ₹${slip.amount.toLocaleString()}`;
+      document.getElementById('modalSlipImg').src = slip.screenshot;
+      document.getElementById('screenshotModal').classList.remove('hidden');
+    }
+
+    function closeScreenshotModal() {
+      document.getElementById('screenshotModal').classList.add('hidden');
+    }
+
+    async function refreshData() {
+      // 1. Fetch Claim Status Monitor
+      try {
+        const sRes = await fetch('/api/admin/user-claim-status');
+        const sData = await sRes.json();
+        const sRows = document.getElementById('claimStatusRows');
+        if (sData.statuses && sData.statuses.length > 0) {
+          sRows.innerHTML = sData.statuses.map(s => `
+            <tr class="hover:bg-slate-50">
+              <td class="p-4 font-black text-slate-900">${s.email}</td>
+              <td class="p-4"><span class="text-[10px] font-black px-2.5 py-1 rounded-full ${s.badge === 'emerald' ? 'bg-emerald-100 text-emerald-800' : (s.badge === 'purple' ? 'bg-purple-100 text-purple-800' : (s.badge === 'amber' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'))}">${s.status}</span></td>
+              <td class="p-4 font-mono font-bold text-slate-700">${s.progress}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (e) {}
+
+      // 2. Fetch All-Users 1-Year Financial Ledger
+      try {
+        const lRes = await fetch('/api/admin/all-user-ledgers');
+        const lData = await lRes.json();
+        const lRows = document.getElementById('allUsersLedgerRows');
+        if (lData.ledgers && lData.ledgers.length > 0) {
+          lRows.innerHTML = lData.ledgers.map(u => {
+            const net = u.deposit1Year - u.withdraw1Year;
+            return `
+              <tr class="hover:bg-slate-50">
+                <td class="p-4 font-black text-slate-900">${u.email}<div class="text-[10px] text-slate-400 font-normal">UID: ${u.uid}</div></td>
+                <td class="p-4 font-black font-mono text-slate-800">₹${u.balance.toLocaleString()}</td>
+                <td class="p-4 font-black font-mono text-emerald-600 bg-emerald-50/40 px-3 py-1 rounded-lg">₹${u.deposit1Year.toLocaleString()}</td>
+                <td class="p-4 font-black font-mono text-rose-600 bg-rose-50/40 px-3 py-1 rounded-lg">₹${u.withdraw1Year.toLocaleString()}</td>
+                <td class="p-4 font-black font-mono text-xs ${net >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${net >= 0 ? '+' : ''}₹${net.toLocaleString()}</td>
+                <td class="p-4 font-extrabold text-purple-700">${u.activePlansCount} Active</td>
+                <td class="p-4"><button onclick="inspectUserHistory('${u.email}')" class="bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 px-3 py-1 rounded-xl text-[11px] font-black">Inspect ➔</button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } catch (e) {}
+
+      // 3. Fetch Chat Threads
+      try {
+        const cRes = await fetch('/api/admin/chat-threads');
+        const cData = await cRes.json();
+        const tList = document.getElementById('chatThreadsList');
+        let total = 0;
+        (cData.threads || []).forEach(t => total += (t.unreadCount || 0));
+        if (prevChatMsgCount !== 0 && total > prevChatMsgCount) triggerAlert("New Chat Message", "A user sent a message.", "chat");
+        prevChatMsgCount = total;
+
+        tList.innerHTML = (cData.threads || []).map(t => `
+          <div onclick="selectChatThread('${t.email}')" class="p-3 rounded-2xl border cursor-pointer ${selectedThreadEmail === t.email ? 'bg-purple-50 border-purple-300' : 'bg-white border-slate-200'}">
+            <span class="font-black text-slate-800 text-xs">${t.email}</span>
+            <div class="text-[11px] text-slate-500 truncate">${t.lastMessage || 'No message'}</div>
+          </div>
+        `).join('');
+      } catch (e) {}
+
+      // 4. Fetch UTR Slips
+      try {
+        const uRes = await fetch('/api/admin/utr-slips');
+        const uData = await uRes.json();
+        currentUtrSlips = uData.slips || [];
+
+        if (prevUtrCount !== null && currentUtrSlips.length > prevUtrCount) triggerAlert("New Deposit Slip", "User uploaded 12-digit UTR with screenshot receipt.", "deposit");
+        prevUtrCount = currentUtrSlips.length;
+
+        document.getElementById('utrRows').innerHTML = currentUtrSlips.map(s => `
+          <tr class="hover:bg-slate-50">
+            <td class="p-4 font-mono font-bold">${s.id}</td>
+            <td class="p-4 font-bold text-slate-800">${s.email}</td>
+            <td class="p-4 font-mono font-black text-slate-900 bg-purple-50/40 px-2 py-1 rounded">${s.utr}</td>
+            <td class="p-4 font-black text-emerald-600 font-mono">₹${s.amount.toLocaleString()}</td>
+            <td class="p-4">
+              ${s.screenshot ? `
+                <button onclick="viewSlipScreenshot('${s.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition">
+                  <i class="fa-regular fa-image"></i>
+                  <span>View Screenshot</span>
+                </button>
+              ` : `
+                <span class="text-slate-400 text-[10px] font-bold">No Image</span>
+              `}
+            </td>
+            <td class="p-4 text-slate-500 text-xs">${s.scannerUsed}</td>
+            <td class="p-4 space-x-1.5">
+              <button onclick="resolveUtr('${s.id}', 'approve')" class="btn-emerald px-3.5 py-1.5 text-xs font-black rounded-xl shadow-sm">Approve</button>
+              <button onclick="resolveUtr('${s.id}', 'reject')" class="bg-rose-50 text-rose-600 hover:bg-rose-100 px-3.5 py-1.5 text-xs font-black rounded-xl border border-rose-200">Reject</button>
+            </td>
+          </tr>
+        `).join('') || `<tr><td colspan="7" class="p-6 text-center text-slate-400 font-bold">No pending UTR slips with screenshots.</td></tr>`;
+      } catch (e) {}
+
+      // 5. Fetch Withdrawals
+      try {
+        const wRes = await fetch('/api/admin/withdrawals');
+        const wData = await wRes.json();
+        if (prevWithdrawalCount !== null && (wData.withdrawals || []).length > prevWithdrawalCount) triggerAlert("New Withdrawal", "User submitted payout request.", "deposit");
+        prevWithdrawalCount = (wData.withdrawals || []).length;
+
+        document.getElementById('withdrawalRows').innerHTML = (wData.withdrawals || []).map(w => `
+          <tr>
+            <td class="p-4 font-mono font-bold">${w.id}</td><td class="p-4">${w.email}</td><td class="p-4 font-black text-emerald-600">₹${w.amount.toLocaleString()}</td><td class="p-4">${w.paymentMethod}</td>
+            <td class="p-4"><button onclick="resolveWithdrawal('${w.id}', 'approve')" class="btn-emerald px-3 py-1 text-xs font-bold rounded-xl mr-1">Approve</button><button onclick="resolveWithdrawal('${w.id}', 'reject')" class="bg-rose-50 text-rose-600 px-3 py-1 text-xs font-bold rounded-xl border border-rose-200">Reject</button></td>
+          </tr>
+        `).join('') || `<tr><td colspan="5" class="p-4 text-center text-slate-400">No pending withdrawals.</td></tr>`;
+      } catch (e) {}
+
+      // 6. Fetch Users
+      try {
+        const usRes = await fetch('/api/admin/all-users');
+        const usData = await usRes.json();
+        document.getElementById('userRows').innerHTML = (usData.users || []).map(u => `
+          <tr>
+            <td class="p-4 font-bold">${u.email}</td>
+            <td class="p-4"><input type="number" id="bal_${u.email}" value="${u.balance}" class="bg-slate-50 border border-slate-300 rounded-xl px-2 py-1 w-24 font-black text-emerald-600"></td>
+            <td class="p-4"><button onclick="updatePoints('${u.email}')" class="btn-purple px-3 py-1 rounded-xl text-xs font-black">Save</button></td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function inspectUserHistory(email) {
+      const res = await fetch(`/api/user/transactions?email=${encodeURIComponent(email)}`);
       const data = await res.json();
-      const tbody = document.getElementById('withdrawal-rows');
-      tbody.innerHTML = '';
-
-      if (!data.withdrawals || data.withdrawals.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">No pending withdrawals.</td></tr>';
-        return;
+      if (data.success) {
+        alert(`1-Year Summary for ${email}:\n• Total Deposited: ₹${data.summary.deposit1Year.toLocaleString()}\n• Total Withdrawn: ₹${data.summary.withdraw1Year.toLocaleString()}\n• Net Platform Cashflow: ₹${data.summary.net1Year.toLocaleString()}\n• Lifetime Records: ${data.summary.totalCount} transactions.`);
       }
+    }
 
-      data.withdrawals.forEach(w => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-800/30';
-        tr.innerHTML = `
-          <td class="p-3.5 text-[11px] text-slate-400">${w.id}<br>${w.date}</td>
-          <td class="p-3.5 font-bold text-white font-sans">${w.email}</td>
-          <td class="p-3.5 text-indigo-400 font-bold">${w.upiId}</td>
-          <td class="p-3.5 text-right font-bold text-emerald-400 text-sm">₹${Number(w.amount).toFixed(2)}</td>
-          <td class="p-3.5 text-center space-x-2 font-sans">
-            <button onclick="resolveWithdrawal('${w.id}', 'approve')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded text-xs font-bold">Approve</button>
-            <button onclick="resolveWithdrawal('${w.id}', 'reject')" class="bg-rose-600 hover:bg-rose-500 text-white px-2.5 py-1 rounded text-xs font-bold">Reject</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+    function selectChatThread(email) {
+      selectedThreadEmail = email;
+      document.getElementById('activeChatUser').innerText = `Conversation: ${email}`;
+      loadThreadMessages(email);
+    }
+
+    async function loadThreadMessages(email) {
+      const res = await fetch(`/api/chat/history?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      const b = document.getElementById('adminChatMessages');
+      b.innerHTML = (data.messages || []).map(m => `
+        <div class="flex flex-col ${m.sender === 'admin' ? 'items-end' : 'items-start'}">
+          <div class="${m.sender === 'admin' ? 'bg-purple-600 text-white' : 'bg-white border border-slate-200 text-slate-800'} p-3 rounded-2xl max-w-[80%]">${m.text}</div>
+          <span class="text-[9px] text-slate-400 mt-0.5">${m.time}</span>
+        </div>
+      `).join('');
+    }
+
+    async function sendAdminReply() {
+      if (!selectedThreadEmail) return alert('Select user first.');
+      const inp = document.getElementById('adminReplyInput');
+      const text = inp.value.trim();
+      if (!text) return;
+      inp.value = '';
+      await fetch('/api/chat/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: selectedThreadEmail, text, sender: 'admin' }) });
+      loadThreadMessages(selectedThreadEmail);
+    }
+
+    async function resolveUtr(id, action) {
+      const res = await fetch('/api/admin/resolve-utr', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action }) });
+      const data = await res.json();
+      alert(data.message);
+      refreshData();
     }
 
     async function resolveWithdrawal(id, action) {
-      await fetch('/api/admin/approve-withdrawal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, action })
-      });
-      loadData();
+      const res = await fetch('/api/admin/approve-withdrawal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action }) });
+      const data = await res.json();
+      alert(data.message);
+      refreshData();
     }
 
-    async function editPoints(email, curBal, curToday) {
-      const b = prompt(`Set new balance for ${email}:`, curBal);
-      if (b === null) return;
-      const t = prompt(`Set new Today Earn for ${email}:`, curToday);
-      if (t === null) return;
-
-      await fetch('/api/admin/update-user-points', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, balance: b, todayEarn: t })
-      });
-      loadData();
+    async function updatePoints(email) {
+      const balance = document.getElementById(`bal_${email}`).value;
+      const res = await fetch('/api/admin/update-user-points', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, balance }) });
+      const data = await res.json();
+      alert(data.message);
+      refreshData();
     }
 
-    function switchView(v) {
-      document.getElementById('sec-users').classList.toggle('hidden', v !== 'users');
-      document.getElementById('sec-utrs').classList.toggle('hidden', v !== 'utrs');
-      document.getElementById('sec-scanners').classList.toggle('hidden', v !== 'scanners');
-      document.getElementById('sec-withdrawals').classList.toggle('hidden', v !== 'withdrawals');
-
-      ['users', 'utrs', 'scanners', 'withdrawals'].forEach(id => {
-        document.getElementById(`nav-${id}`).className = id === v
-          ? 'w-full text-left py-2.5 px-3 rounded-xl bg-indigo-600/20 text-indigo-400 font-bold flex items-center gap-2.5'
-          : 'w-full text-left py-2.5 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/40 font-bold flex items-center gap-2.5';
-      });
-    }
-
-    loadData();
+    setInterval(refreshData, 3500);
   </script>
 </body>
 </html>
