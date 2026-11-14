@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const app = express();
@@ -12,9 +12,6 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'acpay_prod_secret_2026';
-
-const DB_FILE = path.join(__dirname, 'database.json');
-const SCANNERS_FILE = path.join(__dirname, 'scanners_config.json');
 
 const ADMIN_CONFIG = {
   authorizedEmail: (process.env.ADMIN_EMAIL || 'althaf97hussain01@gmail.com').trim().toLowerCase(),
@@ -44,59 +41,86 @@ const defaultScanners = {
   }
 };
 
-function readDb() {
+// CONNECT TO MONGODB ATLAS
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ Connected to Permanent MongoDB Atlas Database'))
+  .catch(err => console.error('❌ MongoDB Connection Error:', err.message));
+
+const StoreSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  data: { type: mongoose.Schema.Types.Mixed, required: true }
+});
+const Store = mongoose.model('Store', StoreSchema);
+
+async function readDb() {
   try {
-    if (!fs.existsSync(DB_FILE)) {
-      fs.writeFileSync(DB_FILE, JSON.stringify(defaultDb, null, 2), 'utf-8');
-      return defaultDb;
+    let doc = await Store.findOne({ key: 'main_db' }).lean();
+    if (!doc) {
+      await Store.create({ key: 'main_db', data: defaultDb });
+      return JSON.parse(JSON.stringify(defaultDb));
     }
-    const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+    const data = doc.data || JSON.parse(JSON.stringify(defaultDb));
+    if (!data.users) data.users = {};
+    if (!data.pendingUtrSlips) data.pendingUtrSlips = [];
+    if (!data.withdrawalRequests) data.withdrawalRequests = [];
+    if (!data.activityLogs) data.activityLogs = [];
     if (!data.completedTransactions) data.completedTransactions = [];
     if (!data.supportChats) data.supportChats = {};
     return data;
   } catch (e) {
-    return defaultDb;
+    console.error('Database read error:', e.message);
+    return JSON.parse(JSON.stringify(defaultDb));
   }
 }
 
-function writeDb(data) {
+async function writeDb(data) {
   try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    await Store.findOneAndUpdate(
+      { key: 'main_db' },
+      { $set: { data } },
+      { upsert: true, new: true }
+    );
   } catch (e) {
     console.error('Database write error:', e.message);
   }
 }
 
-function readScanners() {
+async function readScanners() {
   try {
-    if (!fs.existsSync(SCANNERS_FILE)) {
-      fs.writeFileSync(SCANNERS_FILE, JSON.stringify(defaultScanners, null, 2), 'utf-8');
-      return defaultScanners;
+    let doc = await Store.findOne({ key: 'scanners_config' }).lean();
+    if (!doc) {
+      await Store.create({ key: 'scanners_config', data: defaultScanners });
+      return JSON.parse(JSON.stringify(defaultScanners));
     }
-    const data = JSON.parse(fs.readFileSync(SCANNERS_FILE, 'utf-8'));
+    const data = doc.data || JSON.parse(JSON.stringify(defaultScanners));
     if (!Array.isArray(data.scanners)) {
       const list = [];
       if (data.scanner1) list.push({ id: "scan_1", ...data.scanner1 });
       if (data.scanner2) list.push({ id: "scan_2", ...data.scanner2 });
       if (data.scanner3) list.push({ id: "scan_3", ...data.scanner3 });
       data.scanners = list.length > 0 ? list : defaultScanners.scanners;
-      writeScanners(data);
+      await writeScanners(data);
     }
     return data;
   } catch (e) {
-    return defaultScanners;
+    console.error('Scanners read error:', e.message);
+    return JSON.parse(JSON.stringify(defaultScanners));
   }
 }
 
-function writeScanners(data) {
+async function writeScanners(data) {
   try {
-    fs.writeFileSync(SCANNERS_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    await Store.findOneAndUpdate(
+      { key: 'scanners_config' },
+      { $set: { data } },
+      { upsert: true, new: true }
+    );
   } catch (e) {
     console.error('Scanners write error:', e.message);
   }
 }
 
-// EMAIL DISPATCH VIA BREVO REST API (PORT 443 HTTPS - BYPASSES RENDER SMTP PORT BLOCKS)
+// EMAIL DISPATCH VIA BREVO REST API (PORT 443 HTTPS)
 async function sendOtpEmail(toEmail, otpCode, purpose = 'Security Verification') {
   const apiKey = (process.env.BREVO_API_KEY || '').trim();
   const senderEmail = (process.env.GMAIL_USER || 'halthaf261@gmail.com').trim();
@@ -176,14 +200,14 @@ app.post('/api/admin/verify-access', (req, res) => {
 });
 
 // DYNAMIC SCANNER & BANK CONFIGS
-app.get('/api/scanners/config', (req, res) => {
-  res.json({ success: true, config: readScanners() });
+app.get('/api/scanners/config', async (req, res) => {
+  res.json({ success: true, config: await readScanners() });
 });
 
-app.post('/api/admin/update-scanners', (req, res) => {
+app.post('/api/admin/update-scanners', async (req, res) => {
   try {
     const updated = req.body;
-    writeScanners(updated);
+    await writeScanners(updated);
     res.json({ success: true, message: '✅ Live Scanners and Bank details updated successfully!', config: updated });
   } catch (err) {
     res.status(500).json({ error: 'Failed to save scanner configuration.' });
@@ -195,7 +219,7 @@ app.post('/api/auth/register-send-otp', async (req, res) => {
   const { email } = req.body;
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid Gmail is required' });
   const cleanEmail = email.trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   if (db.users[cleanEmail]) return res.status(400).json({ error: 'Email already registered.' });
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -210,7 +234,7 @@ app.post('/api/auth/register-send-otp', async (req, res) => {
   }
 });
 
-app.post('/api/auth/register-create-account', (req, res) => {
+app.post('/api/auth/register-create-account', async (req, res) => {
   const { email, otp, password, referralCode } = req.body;
   if (!email || !otp || !password) return res.status(400).json({ error: 'All fields required' });
   const cleanEmail = email.trim().toLowerCase();
@@ -220,7 +244,7 @@ app.post('/api/auth/register-create-account', (req, res) => {
     return res.status(400).json({ error: 'Invalid or expired OTP' });
   }
 
-  const db = readDb();
+  const db = await readDb();
   let referrerEmail = null;
   if (referralCode) {
     const cleanRef = referralCode.trim().toUpperCase();
@@ -249,7 +273,7 @@ app.post('/api/auth/register-create-account', (req, res) => {
   };
 
   delete regOtpStore[cleanEmail];
-  writeDb(db);
+  await writeDb(db);
   res.json({ success: true, message: 'Account registered! Please sign in.' });
 });
 
@@ -257,7 +281,7 @@ app.post('/api/auth/register-create-account', (req, res) => {
 app.post('/api/auth/login-send-otp', async (req, res) => {
   const { email, password } = req.body;
   const cleanEmail = (email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   const user = db.users[cleanEmail];
 
   if (!user) return res.status(400).json({ error: 'Account not found. Register first.' });
@@ -275,10 +299,10 @@ app.post('/api/auth/login-send-otp', async (req, res) => {
   }
 });
 
-app.post('/api/auth/login-verify', (req, res) => {
+app.post('/api/auth/login-verify', async (req, res) => {
   const { email, password, otp } = req.body;
   const cleanEmail = (email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   const user = db.users[cleanEmail];
 
   if (!user || user.password !== (password || '').trim()) {
@@ -302,7 +326,7 @@ app.post('/api/auth/login-verify', (req, res) => {
 app.post('/api/auth/forgot-send-otp', async (req, res) => {
   const { email } = req.body;
   const cleanEmail = (email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
 
   if (!db.users[cleanEmail]) return res.status(404).json({ error: 'No account registered with this email.' });
 
@@ -331,7 +355,7 @@ app.post('/api/auth/forgot-verify-otp', (req, res) => {
   res.json({ success: true, message: 'OTP verified successfully! Please enter your new password.' });
 });
 
-app.post('/api/auth/forgot-reset-password', (req, res) => {
+app.post('/api/auth/forgot-reset-password', async (req, res) => {
   const { email, newPassword, confirmPassword } = req.body;
   const cleanEmail = (email || '').trim().toLowerCase();
   const record = forgotOtpStore[cleanEmail];
@@ -348,10 +372,10 @@ app.post('/api/auth/forgot-reset-password', (req, res) => {
     return res.status(400).json({ error: 'Passwords do not match. Please retype carefully.' });
   }
 
-  const db = readDb();
+  const db = await readDb();
   if (db.users[cleanEmail]) {
     db.users[cleanEmail].password = newPassword.trim();
-    writeDb(db);
+    await writeDb(db);
     delete forgotOtpStore[cleanEmail];
     return res.json({ success: true, message: 'Password updated successfully! Please sign in with your new password.' });
   }
@@ -359,9 +383,9 @@ app.post('/api/auth/forgot-reset-password', (req, res) => {
 });
 
 // 3-DAY REFERRAL & 6-DAY 18% LIFECYCLE
-app.get('/api/user/yield-status', (req, res) => {
+app.get('/api/user/yield-status', async (req, res) => {
   const cleanEmail = (req.query.email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   const user = db.users[cleanEmail];
   if (!user) return res.status(404).json({ error: 'User not found' });
 
@@ -391,9 +415,9 @@ app.get('/api/user/yield-status', (req, res) => {
   });
 });
 
-app.post('/api/user/claim-daily-18', (req, res) => {
+app.post('/api/user/claim-daily-18', async (req, res) => {
   const cleanEmail = (req.body.email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   const user = db.users[cleanEmail];
   if (!user) return res.status(404).json({ error: 'User not found' });
 
@@ -441,7 +465,7 @@ app.post('/api/user/claim-daily-18', (req, res) => {
     });
   }
 
-  writeDb(db);
+  await writeDb(db);
   res.json({
     success: true,
     message: `Claimed Day ${plan.completedClaims}/6! ₹${claimAmount.toLocaleString()} credited to balance.`,
@@ -452,7 +476,7 @@ app.post('/api/user/claim-daily-18', (req, res) => {
 });
 
 // UTR & RECEIPT SCREENSHOT SUBMISSION
-app.post('/api/user/submit-utr', (req, res) => {
+app.post('/api/user/submit-utr', async (req, res) => {
   const { email, amount, utr, selectedScanner, packageId, screenshot } = req.body;
   const cleanEmail = (email || '').trim().toLowerCase();
   const cleanUtr = (utr || '').trim();
@@ -466,7 +490,7 @@ app.post('/api/user/submit-utr', (req, res) => {
     return res.status(400).json({ error: 'Please upload your payment screenshot/receipt slip.' });
   }
 
-  const db = readDb();
+  const db = await readDb();
   const isDuplicate = db.pendingUtrSlips.some(s => s.utr === cleanUtr);
   if (isDuplicate) {
     return res.status(400).json({ error: 'This UTR has already been submitted and is in the queue.' });
@@ -486,14 +510,14 @@ app.post('/api/user/submit-utr', (req, res) => {
   };
 
   db.pendingUtrSlips.unshift(newSlip);
-  writeDb(db);
+  await writeDb(db);
   res.json({ success: true, message: 'Receipt submitted! Admin will verify your payment screenshot and UTR.', slip: newSlip });
 });
 
 // RESOLVE UTR
-app.post('/api/admin/resolve-utr', (req, res) => {
+app.post('/api/admin/resolve-utr', async (req, res) => {
   const { id, action } = req.body;
-  const db = readDb();
+  const db = await readDb();
   const idx = db.pendingUtrSlips.findIndex(s => s.id === id);
 
   if (idx !== -1) {
@@ -564,17 +588,17 @@ app.post('/api/admin/resolve-utr', (req, res) => {
     }
 
     db.pendingUtrSlips.splice(idx, 1);
-    writeDb(db);
+    await writeDb(db);
     return res.json({ success: true, message: `UTR Slip ${action}d successfully!` });
   }
   res.status(404).json({ error: 'Slip not found' });
 });
 
 // WITHDRAWAL
-app.post('/api/user/withdraw', (req, res) => {
+app.post('/api/user/withdraw', async (req, res) => {
   const { email, amount, paymentMethod } = req.body;
   const cleanEmail = (email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   const user = db.users[cleanEmail];
 
   if (!user) return res.status(404).json({ error: 'User not found' });
@@ -609,14 +633,14 @@ app.post('/api/user/withdraw', (req, res) => {
     date: new Date().toLocaleDateString()
   });
 
-  writeDb(db);
+  await writeDb(db);
   res.json({ success: true, message: 'Withdrawal submitted to Admin!', balance: user.balance });
 });
 
 // 1-YEAR TRANSACTION HISTORY
-app.get('/api/user/transactions', (req, res) => {
+app.get('/api/user/transactions', async (req, res) => {
   const cleanEmail = (req.query.email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   const now = Date.now();
   const oneYearAgo = now - (365 * 24 * 60 * 60 * 1000);
 
@@ -671,8 +695,8 @@ app.get('/api/user/transactions', (req, res) => {
 });
 
 // ADMIN AUDIT APIS
-app.get('/api/admin/all-user-ledgers', (req, res) => {
-  const db = readDb();
+app.get('/api/admin/all-user-ledgers', async (req, res) => {
+  const db = await readDb();
   const now = Date.now();
   const oneYearAgo = now - (365 * 24 * 60 * 60 * 1000);
 
@@ -699,8 +723,8 @@ app.get('/api/admin/all-user-ledgers', (req, res) => {
   res.json({ success: true, ledgers: usersLedgerSummary });
 });
 
-app.get('/api/admin/user-claim-status', (req, res) => {
-  const db = readDb();
+app.get('/api/admin/user-claim-status', async (req, res) => {
+  const db = await readDb();
   const now = Date.now();
 
   const statuses = Object.keys(db.users).map(email => {
@@ -736,19 +760,19 @@ app.get('/api/admin/user-claim-status', (req, res) => {
 });
 
 // CHAT APIS
-app.get('/api/chat/history', (req, res) => {
+app.get('/api/chat/history', async (req, res) => {
   const cleanEmail = (req.query.email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   res.json({ success: true, messages: db.supportChats[cleanEmail] || [] });
 });
 
-app.post('/api/chat/send', (req, res) => {
+app.post('/api/chat/send', async (req, res) => {
   const { email, text, sender } = req.body;
   const cleanEmail = (email || '').trim().toLowerCase();
   const cleanText = (text || '').trim();
   if (!cleanEmail || !cleanText) return res.status(400).json({ error: 'Invalid message.' });
 
-  const db = readDb();
+  const db = await readDb();
   if (!db.supportChats[cleanEmail]) db.supportChats[cleanEmail] = [];
 
   const messageItem = {
@@ -760,12 +784,12 @@ app.post('/api/chat/send', (req, res) => {
   };
 
   db.supportChats[cleanEmail].push(messageItem);
-  writeDb(db);
+  await writeDb(db);
   res.json({ success: true, message: messageItem });
 });
 
-app.get('/api/admin/chat-threads', (req, res) => {
-  const db = readDb();
+app.get('/api/admin/chat-threads', async (req, res) => {
+  const db = await readDb();
   const threads = Object.keys(db.supportChats).map(email => {
     const list = db.supportChats[email];
     const lastMsg = list.length > 0 ? list[list.length - 1] : null;
@@ -781,9 +805,9 @@ app.get('/api/admin/chat-threads', (req, res) => {
 });
 
 // PROFILE & DETAILS
-app.get('/api/user/profile', (req, res) => {
+app.get('/api/user/profile', async (req, res) => {
   const cleanEmail = (req.query.email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   const user = db.users[cleanEmail];
   if (!user) return res.status(404).json({ error: 'User not found' });
   const safe = { ...user };
@@ -791,16 +815,16 @@ app.get('/api/user/profile', (req, res) => {
   res.json({ success: true, user: safe });
 });
 
-app.get('/api/user/activity', (req, res) => {
+app.get('/api/user/activity', async (req, res) => {
   const cleanEmail = (req.query.email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   res.json({ success: true, logs: db.activityLogs.filter(l => l.user === cleanEmail) });
 });
 
-app.post('/api/user/add-upi', (req, res) => {
+app.post('/api/user/add-upi', async (req, res) => {
   const { email, upiId, bankName, accountNumber, ifsc } = req.body;
   const cleanEmail = (email || '').trim().toLowerCase();
-  const db = readDb();
+  const db = await readDb();
   const user = db.users[cleanEmail];
   if (!user) return res.status(404).json({ error: 'User not found' });
 
@@ -812,24 +836,24 @@ app.post('/api/user/add-upi', (req, res) => {
     addedAt: new Date().toLocaleString()
   });
 
-  writeDb(db);
+  await writeDb(db);
   res.json({ success: true, message: 'Settlement account bound!', upiList: user.upiList });
 });
 
 app.get('/api/packages/list', (req, res) => res.json({ success: true, packages: BUY_PACKAGES }));
-app.get('/api/admin/all-users', (req, res) => res.json({ success: true, users: Object.values(readDb().users) }));
-app.get('/api/admin/utr-slips', (req, res) => res.json({ success: true, slips: readDb().pendingUtrSlips }));
-app.get('/api/admin/withdrawals', (req, res) => res.json({ success: true, withdrawals: readDb().withdrawalRequests }));
+app.get('/api/admin/all-users', async (req, res) => res.json({ success: true, users: Object.values((await readDb()).users) }));
+app.get('/api/admin/utr-slips', async (req, res) => res.json({ success: true, slips: (await readDb()).pendingUtrSlips }));
+app.get('/api/admin/withdrawals', async (req, res) => res.json({ success: true, withdrawals: (await readDb()).withdrawalRequests }));
 
-app.post('/api/admin/approve-withdrawal', (req, res) => {
+app.post('/api/admin/approve-withdrawal', async (req, res) => {
   const { id, action } = req.body;
-  const db = readDb();
+  const db = await readDb();
   const idx = db.withdrawalRequests.findIndex(w => w.id === id);
   if (idx !== -1) {
     const item = db.withdrawalRequests[idx];
     if (action === 'reject' && db.users[item.email]) db.users[item.email].balance += item.amount;
     db.withdrawalRequests.splice(idx, 1);
-    writeDb(db);
+    await writeDb(db);
     return res.json({ success: true, message: `Withdrawal ${action}d` });
   }
   res.status(404).json({ error: 'Request not found' });
